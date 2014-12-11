@@ -24,15 +24,20 @@ def read_toys(toy_file, num_toys):
     :param num_toys: total number of toys to build
     :return: Dictionary of toys
     """
+    i = 0
     toy_dict = {}
     with open(toy_file, 'rb') as f:
         fcsv = csv.reader(f)
         fcsv.next()  # header row
         for row in fcsv:
+	    i += 1
             new_toy = Toy(row[0], row[1], row[2])
             toy_dict[new_toy.id] = new_toy
 	    if len(toy_dict) % 1000 == 0:
 	    	print len(toy_dict)
+
+            if i >= num_toys:
+	    	break
 
     if len(toy_dict) != num_toys:
         print '\n ** Read a file with {0} toys, expected {1} toys. Exiting.'.format(len(toy_dict), num_toys)
@@ -126,14 +131,14 @@ if __name__ == '__main__':
 
     start = time.time()
 
-    NUM_TOYS = 10000000
+    NUM_TOYS = 100000
     NUM_ELVES = 900
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
     myToys = read_toys(toy_file, NUM_TOYS)
     print ' -- All toys read. Starting to score submission. '
 
-    sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2.csv')
+    sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_naive_%d.csv' % NUM_TOYS)
     hrs = Hours()
     score_submission(sub_file, myToys, hrs, NUM_ELVES)
 

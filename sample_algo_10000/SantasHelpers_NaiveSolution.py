@@ -56,6 +56,7 @@ def solution_firstAvailableElf(toy_file, soln_file, myelves):
     :param myelves: list of elves in a priority queue ordered by next available time
     :return:
     """
+    i = 0
     hrs = Hours()
     ref_time = datetime.datetime(2014, 1, 1, 0, 0)
     row_count = 0
@@ -68,6 +69,7 @@ def solution_firstAvailableElf(toy_file, soln_file, myelves):
             wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
 
             for row in toysfile:
+	    	i += 1
                 current_toy = Toy(row[0], row[1], row[2])
 
                 # get next available elf
@@ -95,6 +97,9 @@ def solution_firstAvailableElf(toy_file, soln_file, myelves):
                 time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
                 wcsv.writerow([current_toy.id, current_elf.id, time_string, work_duration])
 
+		if i >= NUM_TOYS:
+			break
+
 
 # ======================================================================= #
 # === MAIN === #
@@ -104,9 +109,10 @@ if __name__ == '__main__':
     start = time.time()
 
     NUM_ELVES = 900
+    NUM_TOYS = 100000
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
-    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_algo.csv')
+    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_naive_%d.csv' % NUM_TOYS)
 
     myelves = create_elves(NUM_ELVES)
     solution_firstAvailableElf(toy_file, soln_file, myelves)
