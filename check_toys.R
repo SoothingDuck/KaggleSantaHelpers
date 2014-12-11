@@ -2,14 +2,24 @@
 library(stringr)
 library(lubridate)
 library(ggplot2)
+library(plyr)
 
 df <- read.csv("DATA/toys_rev2.csv", stringsAsFactor=FALSE)
 
 df$DateArrival <- ymd_hm(df$Arrival_time)
 
-df.month <- subset(df, DateArrival < ymd_hms("2014-02-01 00:00:00"))
-df.day <- subset(df, DateArrival < ymd_hms("2014-01-02 00:00:00") & DateArrival > ymd_hms("2014-01-01 00:00:00"))
+df$in.working.hours <- factor(ifelse(hour(df$DateArrival) < 9 & df$DateArrival > 18, "No", "Yes"))
 
-ggplot(df.day) + geom_histogram(aes(x=DateArrival), binwidth=10)
-ggplot(df.day) + geom_histogram(aes(x=Duration), binwidth=5) + xlim(0,300)
-ggplot(df.day) + geom_bar(aes(x=DateArrival, weight = Duration),binwidth=10) 
+df.one.day <- subset(df, DateArrival <= ymd_hm("2014-01-01 23:59"))
+
+agg <- ddply(
+  df.one.day,
+  .(in.working.hours),
+  summarise,
+  total.dur=sum(Duration),
+  min.dur=min(Duration),
+  max.dur=max(Duration),
+  avg.dur=mean(Duration)
+  )
+
+ggplot(df.one.day) + geom_histogram(aes(x=DateArrival, weight=Duration),binwidth=60)
