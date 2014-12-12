@@ -11,6 +11,7 @@ import math
 import heapq
 import time
 import datetime
+import numpy as np
 
 from hours import Hours
 from toy import Toy
@@ -93,6 +94,10 @@ def solution_firstAvailableElf(toy_file, soln_file, myelves):
     ref_time = datetime.datetime(2014, 1, 1, 0, 0)
     row_count = 0
 
+    trace = open(os.path.join("..", "DATA", "trace_Naive.log"), "wb")
+    tcsv = csv.writer(trace)
+    tcsv.writerow(["TimeString","MinProductivity", "MaxProductivity", "AvgProductivity"])
+
     with open(toy_file, 'rb') as f:
         toysfile = csv.reader(f)
         toysfile.next()  # header row
@@ -125,10 +130,20 @@ def solution_firstAvailableElf(toy_file, soln_file, myelves):
                 # put elf back in heap
                 heapq.heappush(myelves, (current_elf.next_available_time, current_elf))
 
+                # productivity
+		t = np.array([x[1].rating for x in myelves])
+		avg_r = np.mean(t)
+		min_r = np.min(t)
+		max_r = np.max(t)
+
                 # write to file in correct format
                 tt = ref_time + datetime.timedelta(seconds=60*work_start_time)
                 time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
                 wcsv.writerow([current_toy.id, current_elf.id, time_string, work_duration])
+		tcsv.writerow([time_string, min_r, max_r, avg_r])
+
+                if i % 1000 == 0:
+			print "%d toys viewed" % i
 
 		if i >= NUM_TOYS:
 			break
