@@ -37,7 +37,7 @@ def read_toys(toy_file, num_toys):
         for row in fcsv:
 	    i += 1
             new_toy = Toy(row[0], row[1], row[2])
-            heapq.heappush(toy_heap, (int(row[2]), new_toy))
+            heapq.heappush(toy_heap, (new_toy.arrival_minute, new_toy))
 	    if len(toy_heap) % 1000 == 0:
 	    	print len(toy_heap)
 
@@ -148,6 +148,7 @@ def solution_smallBigQueueElf(toy_file, soln_file, myelves):
     row_count = 0
 
     all_toys = read_toys(toy_file, NUM_TOYS)
+    all_elves = []
 
     big_duration_threshold = 60
     big_productivity_threshold = 3.0
@@ -158,25 +159,114 @@ def solution_smallBigQueueElf(toy_file, soln_file, myelves):
     big_productivity_elves = []
     low_productivity_elves = []
 
+    def get_min_available_time(big, low):
+        if big == []: 
+		return low[0][0]
+	elif low == []:
+		return big[0][0]
+	else:
+		return min(low[0][0], big[0][0])
+
+    # Tri des elfes
     for elf_available_time, elf in myelves:
         if elf.rating < big_productivity_threshold:
 		heapq.heappush(low_productivity_elves, (elf_available_time, elf))
 	else:
 		heapq.heappush(big_productivity_elves, (elf_available_time, elf))
 
-    for elf_available_time, elf in low_productivity_elves:
-	    print elf
+    with open(soln_file, 'wb') as w:
+        wcsv = csv.writer(w)
+        wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
+        i = 0
+        # Round
+        while len(all_toys) > 0:
+    
+            # Alimentation des jouets jusqu'au available time minimum d'un elfe
+            min_available_time_elves = get_min_available_time(big_productivity_elves, low_productivity_elves)
+            while i < min_available_time_elves:
+                i, current_toy = heapq.heappop(all_toys)
+                print current_toy
+    	        if current_toy.duration > big_duration_threshold:
+                    heapq.heappush(big_toys, (-current_toy.duration, current_toy))
+                else:
+                    heapq.heappush(small_toys, (current_toy.duration, current_toy))
+    
+            print(len(small_toys))
+	    print(len(big_toys))
 
-    sys.exit(1)
+            # Assignation de jouets selon les elfes disponibles dans la file low
+    	    while ((small_toys != []) and (low_productivity_elves != [])):
+                # low toy
+                tmp, current_toy = heapq.heappop(small_toys)
 
-    i = 0
-    # Round
-    while len(all_toys) > 0:
-	toy = heapq.heappop(all_toys)
-	i += 1
-	if i % 1000 == 0:
-		print "Nb jouet traite : %d" % i
+                # get next available elf
+                elf_available_time, current_elf = heapq.heappop(low_productivity_elves)
+                
+                work_start_time = elf_available_time
+                if current_toy.arrival_minute > elf_available_time:
+                    work_start_time = current_toy.arrival_minute
+                
+                # work_start_time cannot be before toy's arrival
+                if work_start_time < current_toy.arrival_minute:
+                    print 'Work_start_time before arrival minute: {0}, {1}'.\
+                	format(work_start_time, current_toy.arrival_minute)
+                    exit(-1)
+                
+                current_elf.next_available_time, work_duration = \
+                    assign_elf_to_toy(work_start_time, current_elf, current_toy, hrs)
+                current_elf.update_elf(hrs, current_toy, work_start_time, work_duration)
+                
+                # put elf back in heap
+                heapq.heappush(all_elves, (current_elf.next_available_time, current_elf))
+                
+                # write to file in correct format
+                tt = ref_time + datetime.timedelta(seconds=60*work_start_time)
+                time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
+                wcsv.writerow([current_toy.id, current_elf.id, time_string, work_duration])
+        
+            # Assignation de jouets selon les elfes disponibles dans la file high
+    	    while ((big_productivity_elves != [])):
+                if big_toys != []:
+                    tmp, current_toy = heapq.heappop(big_toys)
+                elif small_toys != []:
+                    tmp, current_toy = heapq.heappop(small_toys)
+                else:
+                    break
 
+                # get next available elf
+                elf_available_time, current_elf = heapq.heappop(big_productivity_elves)
+                
+                work_start_time = elf_available_time
+                if current_toy.arrival_minute > elf_available_time:
+                    work_start_time = current_toy.arrival_minute
+                
+                # work_start_time cannot be before toy's arrival
+                if work_start_time < current_toy.arrival_minute:
+                    print 'Work_start_time before arrival minute: {0}, {1}'.\
+                	format(work_start_time, current_toy.arrival_minute)
+                    exit(-1)
+                
+                current_elf.next_available_time, work_duration = \
+                    assign_elf_to_toy(work_start_time, current_elf, current_toy, hrs)
+                current_elf.update_elf(hrs, current_toy, work_start_time, work_duration)
+                
+                # put elf back in heap
+                heapq.heappush(all_elves, (current_elf.next_available_time, current_elf))
+                
+                # write to file in correct format
+                tt = ref_time + datetime.timedelta(seconds=60*work_start_time)
+                time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
+                wcsv.writerow([current_toy.id, current_elf.id, time_string, work_duration])
+        
+            print(len(small_toys))
+	    print(len(big_toys))
+            sys.exit(0)
+
+        print(len(big_toys))
+	print(len(small_toys))
+        sys.exit(1)
+
+    print get_min_available_time(big_productivity_elves, low_productivity_elves)
     sys.exit(0)
 
     with open(toy_file, 'rb') as f:
