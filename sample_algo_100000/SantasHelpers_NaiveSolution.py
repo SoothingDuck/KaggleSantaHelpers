@@ -149,9 +149,25 @@ def solution_smallBigQueueElf(toy_file, soln_file, myelves):
 
     all_toys = read_toys(toy_file, NUM_TOYS)
 
+    big_duration_threshold = 60
+    big_productivity_threshold = 3.0
+
     big_toys = []
     small_toys = []
 
+    big_productivity_elves = []
+    low_productivity_elves = []
+
+    for elf_available_time, elf in myelves:
+        if elf.rating < big_productivity_threshold:
+		heapq.heappush(low_productivity_elves, (elf_available_time, elf))
+	else:
+		heapq.heappush(big_productivity_elves, (elf_available_time, elf))
+
+    for elf_available_time, elf in low_productivity_elves:
+	    print elf
+
+    sys.exit(1)
 
     i = 0
     # Round

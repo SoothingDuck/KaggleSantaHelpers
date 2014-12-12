@@ -11,6 +11,9 @@ class Elf:
         self.rating_increase = 1.02
         self.rating_decrease = 0.90
 
+    def __str__(self):
+        return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.next_available_time)
+
     def update_elf(self, hrs, toy, start_minute, duration):
         """ Updates the elf's productivity rating and next available time based on last toy completed.
         :param hrs: Hours object for bookkeeping
