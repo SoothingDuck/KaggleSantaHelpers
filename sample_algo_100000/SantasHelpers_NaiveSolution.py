@@ -150,8 +150,11 @@ def solution_smallBigQueueElf(toy_file, soln_file, myelves):
     all_toys = read_toys(toy_file, NUM_TOYS)
     all_elves = []
 
-    big_duration_threshold = 60
-    big_productivity_threshold = 3.0
+    for tmp, elf in myelves:
+        heapq.heappush(all_elves, (elf.next_available_time, elf))
+
+    big_duration_threshold = 300
+    big_productivity_threshold = 1.2
 
     big_toys = []
     small_toys = []
@@ -167,63 +170,53 @@ def solution_smallBigQueueElf(toy_file, soln_file, myelves):
 	else:
 		return min(low[0][0], big[0][0])
 
-    # Tri des elfes
-    for elf_available_time, elf in myelves:
-        if elf.rating < big_productivity_threshold:
-		heapq.heappush(low_productivity_elves, (elf_available_time, elf))
-	else:
-		heapq.heappush(big_productivity_elves, (elf_available_time, elf))
+    trace = open(os.path.join("trace.log"), "wb")
+    tcsv = csv.writer(trace)
 
     with open(soln_file, 'wb') as w:
         wcsv = csv.writer(w)
         wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
         i = 0
+	j = 0
         # Round
-        while len(all_toys) > 0:
+        while ((len(all_toys) > 0) or (len(small_toys) + len(big_toys) > 0)):
+            j = j + 1
     
+            # Tri des elfes
+	    while all_elves != []:
+                elf_available_time, elf = heapq.heappop(all_elves)
+                if elf.rating < big_productivity_threshold:
+                    heapq.heappush(low_productivity_elves, (elf_available_time, elf))
+        	else:
+                    heapq.heappush(big_productivity_elves, (elf_available_time, elf))
+
+            print("Low Elf : %d, High Elf :  %d" % (len(low_productivity_elves), len(big_productivity_elves)))
+
             # Alimentation des jouets jusqu'au available time minimum d'un elfe
             min_available_time_elves = get_min_available_time(big_productivity_elves, low_productivity_elves)
-            while i < min_available_time_elves:
-                i, current_toy = heapq.heappop(all_toys)
-                print current_toy
+
+	    if all_toys != []:
+                min_available_time_toys, current_toy = heapq.heappop(all_toys)
     	        if current_toy.duration > big_duration_threshold:
                     heapq.heappush(big_toys, (-current_toy.duration, current_toy))
                 else:
                     heapq.heappush(small_toys, (current_toy.duration, current_toy))
+            print("Min Elf : %d, Min Toys : %d" % (min_available_time_elves, min_available_time_toys))
+            while min_available_time_toys <= min_available_time_elves:
+                if all_toys != []:
+                    min_available_time_toys, current_toy = heapq.heappop(all_toys)
+        	    if current_toy.duration > big_duration_threshold:
+                        heapq.heappush(big_toys, (-current_toy.duration, current_toy))
+                    else:
+                        heapq.heappush(small_toys, (current_toy.duration, current_toy))
+                else:
+                    break
     
-            print(len(small_toys))
-	    print(len(big_toys))
+            print("Small Toys : %d, Big Toys : %d" % (len(small_toys), len(big_toys)))
+            #print(len(small_toys))
+	    #print(len(big_toys))
+	    print(len(all_toys))
 
-            # Assignation de jouets selon les elfes disponibles dans la file low
-    	    while ((small_toys != []) and (low_productivity_elves != [])):
-                # low toy
-                tmp, current_toy = heapq.heappop(small_toys)
-
-                # get next available elf
-                elf_available_time, current_elf = heapq.heappop(low_productivity_elves)
-                
-                work_start_time = elf_available_time
-                if current_toy.arrival_minute > elf_available_time:
-                    work_start_time = current_toy.arrival_minute
-                
-                # work_start_time cannot be before toy's arrival
-                if work_start_time < current_toy.arrival_minute:
-                    print 'Work_start_time before arrival minute: {0}, {1}'.\
-                	format(work_start_time, current_toy.arrival_minute)
-                    exit(-1)
-                
-                current_elf.next_available_time, work_duration = \
-                    assign_elf_to_toy(work_start_time, current_elf, current_toy, hrs)
-                current_elf.update_elf(hrs, current_toy, work_start_time, work_duration)
-                
-                # put elf back in heap
-                heapq.heappush(all_elves, (current_elf.next_available_time, current_elf))
-                
-                # write to file in correct format
-                tt = ref_time + datetime.timedelta(seconds=60*work_start_time)
-                time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
-                wcsv.writerow([current_toy.id, current_elf.id, time_string, work_duration])
-        
             # Assignation de jouets selon les elfes disponibles dans la file high
     	    while ((big_productivity_elves != [])):
                 if big_toys != []:
@@ -258,9 +251,46 @@ def solution_smallBigQueueElf(toy_file, soln_file, myelves):
                 time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
                 wcsv.writerow([current_toy.id, current_elf.id, time_string, work_duration])
         
-            print(len(small_toys))
-	    print(len(big_toys))
-            sys.exit(0)
+            # Assignation de jouets selon les elfes disponibles dans la file low
+    	    while ((low_productivity_elves != [])):
+                # low toy
+		if small_toys != []:
+                    tmp, current_toy = heapq.heappop(small_toys)
+                elif big_toys != []:
+                    tmp, current_toy = heapq.heappop(big_toys)
+                else:
+                    break
+
+                # get next available elf
+                elf_available_time, current_elf = heapq.heappop(low_productivity_elves)
+                
+                work_start_time = elf_available_time
+                if current_toy.arrival_minute > elf_available_time:
+                    work_start_time = current_toy.arrival_minute
+                
+                # work_start_time cannot be before toy's arrival
+                if work_start_time < current_toy.arrival_minute:
+                    print 'Work_start_time before arrival minute: {0}, {1}'.\
+                	format(work_start_time, current_toy.arrival_minute)
+                    exit(-1)
+                
+                current_elf.next_available_time, work_duration = \
+                    assign_elf_to_toy(work_start_time, current_elf, current_toy, hrs)
+                current_elf.update_elf(hrs, current_toy, work_start_time, work_duration)
+                
+                # put elf back in heap
+                heapq.heappush(all_elves, (current_elf.next_available_time, current_elf))
+                
+                # write to file in correct format
+                tt = ref_time + datetime.timedelta(seconds=60*work_start_time)
+                time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
+                wcsv.writerow([current_toy.id, current_elf.id, time_string, work_duration])
+        
+            #print(len(small_toys))
+	    #print(len(big_toys))
+	    print(len(all_toys))
+
+        sys.exit(0)
 
         print(len(big_toys))
 	print(len(small_toys))
@@ -327,10 +357,11 @@ if __name__ == '__main__':
     NUM_TOYS = 100000
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
-    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_naive_%d.csv' % NUM_TOYS)
+    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavail_%d.csv' % NUM_TOYS)
+    #soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_bigqueue_%d.csv' % NUM_TOYS)
 
     myelves = create_elves(NUM_ELVES)
-    #solution_firstAvailableElf(toy_file, soln_file, myelves)
-    solution_smallBigQueueElf(toy_file, soln_file, myelves)
+    solution_firstAvailableElf(toy_file, soln_file, myelves)
+    #solution_smallBigQueueElf(toy_file, soln_file, myelves)
 
     print 'total runtime = {0}'.format(time.time() - start)
