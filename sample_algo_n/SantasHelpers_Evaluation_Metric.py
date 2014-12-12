@@ -139,6 +139,7 @@ if __name__ == '__main__':
     print ' -- All toys read. Starting to score submission. '
 
     sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavail_%d.csv' % NUM_TOYS)
+    #sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavailifproductive_%d.csv' % NUM_TOYS)
     #sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_bigqueue_%d.csv' % NUM_TOYS)
     hrs = Hours()
     score_submission(sub_file, myToys, hrs, NUM_ELVES)

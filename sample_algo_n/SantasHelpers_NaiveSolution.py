@@ -80,6 +80,78 @@ def assign_elf_to_toy(input_time, current_elf, current_toy, hrs):
     else:
         return hrs.apply_resting_period(start_time + duration, unsanctioned), duration
 
+def solution_firstAvailableIfProductiveElf(toy_file, soln_file, myelves):
+    """ Creates a simple solution where the next available elf is assigned a toy. Elves do not start
+    work outside of sanctioned hours.
+    :param toy_file: filename for toys file (input)
+    :param soln_file: filename for solution file (output)
+    :param myelves: list of elves in a priority queue ordered by next available time
+    :return:
+    """
+    i = 0
+    hrs = Hours()
+    ref_time = datetime.datetime(2014, 1, 1, 0, 0)
+    row_count = 0
+
+    trace = open(os.path.join("..", "DATA", "trace_Naive.log"), "wb")
+    tcsv = csv.writer(trace)
+    tcsv.writerow(["TimeString","MinProductivity", "MaxProductivity", "AvgProductivity"])
+
+    with open(toy_file, 'rb') as f:
+        toysfile = csv.reader(f)
+        toysfile.next()  # header row
+
+        with open(soln_file, 'wb') as w:
+            wcsv = csv.writer(w)
+            wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
+
+            for row in toysfile:
+	    	i += 1
+                current_toy = Toy(row[0], row[1], row[2])
+
+                # get next available elf
+		if current_toy.duration < 60:
+                    elf_available_time, current_elf = heapq.heappop(myelves)
+                else:
+                    tmp = np.array([x[1].rating for x in myelves])
+		    index = np.argmax(tmp)
+		    elf_available_time, current_elf = myelves.pop(index)
+
+                work_start_time = elf_available_time
+                if current_toy.arrival_minute > elf_available_time:
+                    work_start_time = current_toy.arrival_minute
+
+                # work_start_time cannot be before toy's arrival
+                if work_start_time < current_toy.arrival_minute:
+                    print 'Work_start_time before arrival minute: {0}, {1}'.\
+                        format(work_start_time, current_toy.arrival_minute)
+                    exit(-1)
+
+                current_elf.next_available_time, work_duration = \
+                    assign_elf_to_toy(work_start_time, current_elf, current_toy, hrs)
+                current_elf.update_elf(hrs, current_toy, work_start_time, work_duration)
+
+                # put elf back in heap
+                heapq.heappush(myelves, (current_elf.next_available_time, current_elf))
+
+                # productivity
+		t = np.array([x[1].rating for x in myelves])
+		avg_r = np.mean(t)
+		min_r = np.min(t)
+		max_r = np.max(t)
+
+                # write to file in correct format
+                tt = ref_time + datetime.timedelta(seconds=60*work_start_time)
+                time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
+                wcsv.writerow([current_toy.id, current_elf.id, time_string, work_duration])
+		tcsv.writerow([time_string, min_r, max_r, avg_r])
+
+                if i % 1000 == 0:
+			print "%d toys viewed" % i
+
+		if i >= NUM_TOYS:
+			break
+
 
 def solution_firstAvailableElf(toy_file, soln_file, myelves):
     """ Creates a simple solution where the next available elf is assigned a toy. Elves do not start
@@ -372,11 +444,13 @@ if __name__ == '__main__':
     NUM_TOYS = 100000
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
-    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavail_%d.csv' % NUM_TOYS)
+    #soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavail_%d.csv' % NUM_TOYS)
+    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavailifproductive_%d.csv' % NUM_TOYS)
     #soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_bigqueue_%d.csv' % NUM_TOYS)
 
     myelves = create_elves(NUM_ELVES)
-    solution_firstAvailableElf(toy_file, soln_file, myelves)
+    #solution_firstAvailableElf(toy_file, soln_file, myelves)
+    solution_firstAvailableIfProductiveElf(toy_file, soln_file, myelves)
     #solution_smallBigQueueElf(toy_file, soln_file, myelves)
 
     print 'total runtime = {0}'.format(time.time() - start)
