@@ -10,6 +10,9 @@ class Toy:
         self.duration = int(duration)
         self.completed_minute = 0
 
+    def __str__(self):
+        return "Toy %s : Arrival %s, Duration %s, Completed %s" % (self.id, self.arrival_minute, self.duration, self.completed_minute)
+
     def outside_toy_start_period(self, start_minute):
         """ Checks that work on toy does not start outside of the allowed starting period.
         :param hrs: Hours class

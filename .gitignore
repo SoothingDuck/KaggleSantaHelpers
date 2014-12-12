@@ -62,3 +62,6 @@ DATA/*.csv
 .Rhistory
 *.Rproj
 
+# Vim trash
+*.swp
+*~
