@@ -1,6 +1,8 @@
 
+import unittest
 import math
 import hours as hrs
+import datetime
 
 class Elf:
     """ Each Elf starts with a rating of 1.0 and are available at 09:00 on Jan 1.  """
@@ -11,8 +13,14 @@ class Elf:
         self.rating_increase = 1.02
         self.rating_decrease = 0.90
 
+        self.__time_base = datetime.datetime(2014,1,1,0,0,0)
+
     def __str__(self):
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.next_available_time)
+
+    def get_available_time(self):
+        return self.__time_base + datetime.timedelta(minutes=self.next_available_time)
+
 
     def update_elf(self, hrs, toy, start_minute, duration):
         """ Updates the elf's productivity rating and next available time based on last toy completed.
@@ -61,3 +69,16 @@ class Elf:
         self.rating = max(0.25,
                           min(4.0, self.rating * (self.rating_increase ** (sanctioned/60.0)) *
                               (self.rating_decrease ** (unsanctioned/60.0))))
+
+
+class ElfTest(unittest.TestCase):
+
+    def setUp(self):
+        self.elf = Elf(1)
+
+    def test_get_available_time(self):
+
+        self.assertEqual(self.elf.get_available_time(), datetime.datetime(2014,1,1,9,0,0))
+
+if __name__ == '__main__':
+    unittest.main()
