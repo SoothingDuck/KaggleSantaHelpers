@@ -1,4 +1,4 @@
-
+import unittest
 import datetime
 
 class Hours:
@@ -92,3 +92,18 @@ class Hours:
 
         total_days = num_days_since_jan1 + rest_time_in_working_days
         return total_days * self.minutes_in_24h + local_start + rest_time_remaining_minutes
+
+class HoursTest(unittest.TestCase):
+
+	def setUp(self):
+		self.h = Hours()
+
+	def test_sanctionned(self):
+		sanctionned, unsanctionned = self.h.get_sanctioned_breakdown(520, 45)
+
+		self.assertEqual(sanctionned, 25)
+		self.assertEqual(unsanctionned, 20)
+
+if __name__ == '__main__':
+	unittest.main()
+
