@@ -3,6 +3,7 @@ import unittest
 import math
 import hours as hrs
 import datetime
+from toy import Toy
 
 class Elf:
     """ Each Elf starts with a rating of 1.0 and are available at 09:00 on Jan 1.  """
@@ -21,6 +22,8 @@ class Elf:
     def get_available_time(self):
         return self.__time_base + datetime.timedelta(minutes=self.next_available_time)
 
+    def will_finish_toy_in_sanctionned_hours(self, toy):
+        pass
 
     def update_elf(self, hrs, toy, start_minute, duration):
         """ Updates the elf's productivity rating and next available time based on last toy completed.
@@ -74,11 +77,31 @@ class Elf:
 class ElfTest(unittest.TestCase):
 
     def setUp(self):
-        self.elf = Elf(1)
+        self.elf_productivity_1 = Elf(1)
+        self.elf_productivity_2 = Elf(2)
+        self.elf_productivity_2.rating = 2
+
 
     def test_get_available_time(self):
 
         self.assertEqual(self.elf.get_available_time(), datetime.datetime(2014,1,1,9,0,0))
+
+    def test_will_finish_toy_in_sanctionned_hours(self):
+        toy1 = Toy(1, "2014 1 1 0 0", 600)
+        toy2 = Toy(1, "2014 1 1 0 0", 601)
+
+        self.assertTrue(self.elf_productivity_1.will_finish_toy_in_sanctionned_hours(toy1))
+        self.assertFalse(self.elf_productivity_1.will_finish_toy_in_sanctionned_hours(toy2))
+
+        self.assertTrue(self.elf_productivity_1.will_finish_toy_in_sanctionned_hours(toy1))
+        self.assertTrue(self.elf_productivity_2.will_finish_toy_in_sanctionned_hours(toy2))
+
+    def test_get_time_to_wait_for_toy(self):
+        toy1 = Toy(1, "2014 1 1 0 0", 600)
+        toy2 = Toy(1, "2014 1 10 0 0", 601)
+
+        self.elf_productivity_1.get_time_to_wait_for_toy(toy1)
+        self.elf_productivity_1.get_time_to_wait_for_toy(toy2)
 
 if __name__ == '__main__':
     unittest.main()
