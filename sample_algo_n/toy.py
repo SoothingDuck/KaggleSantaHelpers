@@ -1,3 +1,4 @@
+import unittest
 import datetime
 import math
 from hours import Hours
@@ -10,8 +11,11 @@ class Toy:
         self.duration = int(duration)
         self.completed_minute = 0
 
+        self.__time_base = datetime.datetime(2014, 1, 1, 0, 0)
+
     def __str__(self):
         return "Toy %s : Arrival %s, Duration %s, Completed %s" % (self.id, self.arrival_minute, self.duration, self.completed_minute)
+
 
     def outside_toy_start_period(self, start_minute):
         """ Checks that work on toy does not start outside of the allowed starting period.
@@ -33,3 +37,23 @@ class Toy:
             return True
         else:
             return False
+
+    def get_min_possible_working_time(self):
+        pass
+
+class ToyTest(unittest.TestCase):
+
+    def setUp(self):
+        self.toy1 = Toy(1, "2014 1 1 2 0", 600)
+        self.toy2 = Toy(2, "2014 1 1 9 30", 600)
+        self.toy3 = Toy(3, "2014 1 1 19 30", 600)
+
+    def test_get_min_possible_working_time(self):
+        self.assertEqual(self.toy1.get_min_possible_working_time(), datetime.datetime(2014, 1, 1, 9, 0))
+        self.assertEqual(self.toy2.get_min_possible_working_time(), datetime.datetime(2014, 1, 1, 9, 30))
+        self.assertEqual(self.toy3.get_min_possible_working_time(), datetime.datetime(2014, 1, 2, 9, 0))
+
+
+if __name__ == '__main__':
+    unittest.main()
+
