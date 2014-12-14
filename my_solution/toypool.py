@@ -3,13 +3,17 @@ import unittest
 class ToyPool:
 
     def __init__(self):
-        # ordonné par ordre d'arrivée
-        self.__all_toys = []
-
-        # hash : key durée, value tableau ordonné par date de disponibilité
 
 
-    def 
+        # Sequence ordonnées (timestamp, nombre d'objet) pour maintenir les compteurs de nombre d'objets
+        self.__timestamp_counters = []
+
+        # Hash : avec en clé un timestamp et en valeur une heap ordonnée par durée d'objet
+        self.__hash_heap_toys = {}
+
+
+    def add_file_content(filename, num_object):
+        pass
 
 class ToyPoolTest(unittest.TestCase):
 
