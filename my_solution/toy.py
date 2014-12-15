@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import unittest
 import datetime
 import math
@@ -16,6 +18,9 @@ class Toy:
     def __str__(self):
         return "Toy %s : Arrival %s, Duration %s, Completed %s" % (self.id, self.arrival_minute, self.duration, self.completed_minute)
 
+    def get_toy_duration(self):
+        """Renvoi la durée de création d'un objet"""
+        return self.duration
 
     def outside_toy_start_period(self, start_minute):
         """ Checks that work on toy does not start outside of the allowed starting period.
@@ -38,7 +43,7 @@ class Toy:
         else:
             return False
 
-    def get_min_possible_working_time(self):
+    def get_min_possible_working_start_time(self):
         pass
 
 class ToyTest(unittest.TestCase):
@@ -48,10 +53,10 @@ class ToyTest(unittest.TestCase):
         self.toy2 = Toy(2, "2014 1 1 9 30", 600)
         self.toy3 = Toy(3, "2014 1 1 19 30", 600)
 
-    def test_get_min_possible_working_time(self):
-        self.assertEqual(self.toy1.get_min_possible_working_time(), datetime.datetime(2014, 1, 1, 9, 0))
-        self.assertEqual(self.toy2.get_min_possible_working_time(), datetime.datetime(2014, 1, 1, 9, 30))
-        self.assertEqual(self.toy3.get_min_possible_working_time(), datetime.datetime(2014, 1, 2, 9, 0))
+    def test_get_min_possible_working_start_time(self):
+        self.assertEqual(self.toy1.get_min_possible_working_start_time(), datetime.datetime(2014, 1, 1, 9, 0))
+        self.assertEqual(self.toy2.get_min_possible_working_start_time(), datetime.datetime(2014, 1, 1, 9, 30))
+        self.assertEqual(self.toy3.get_min_possible_working_start_time(), datetime.datetime(2014, 1, 2, 9, 0))
 
 
 if __name__ == '__main__':
