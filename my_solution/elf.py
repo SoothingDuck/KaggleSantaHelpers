@@ -16,6 +16,16 @@ class Elf:
 
         self.__time_base = datetime.datetime(2014,1,1,0,0,0)
 
+    def set_next_available_time(self, next_timestamp):
+        """Deplace le next available time"""
+        current_available_time =  self.__time_base + datetime.timedelta(minutes=self.next_available_time)
+        minutes_diff = int(((next_timestamp-current_available_time)/60).total_seconds())
+        self.next_available_time = self.next_available_time + minutes_diff
+
+    def get_available_time_in_minutes(self):
+        """Retourne le next available time"""
+        return self.next_available_time
+
     def __str__(self):
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.next_available_time)
 
@@ -83,8 +93,10 @@ class ElfTest(unittest.TestCase):
 
 
     def test_get_available_time(self):
-
-        self.assertEqual(self.elf.get_available_time(), datetime.datetime(2014,1,1,9,0,0))
+        elf = Elf(1)
+        self.assertEqual(elf.get_available_time(), datetime.datetime(2014,1,1,9,0,0))
+        elf.set_next_available_time(datetime.datetime(2014, 1, 1, 11, 40))
+        self.assertEqual(elf.get_available_time(), datetime.datetime(2014,1,1,11,40,0))
 
     def test_will_finish_toy_in_sanctionned_hours(self):
         toy1 = Toy(1, "2014 1 1 0 0", 600)

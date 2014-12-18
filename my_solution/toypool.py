@@ -16,8 +16,7 @@ class ToyPool:
         # Heap de base
         self.__base_heap = []
 
-        # Liste triÃ©e par timestamp pour la recherche random
-        self.__random_search_sorted = False
+        # Liste triée par timestamp pour la recherche random
         self.__sorted_toys_for_random_search = []
 
         # Hash par timestamp avec heap ordonnÃ© par duration
@@ -45,7 +44,7 @@ class ToyPool:
             self.__random_search_sorted = False
             self.__sorted_toys_for_random_search.append((toy_timestamp, toy))
         else:
-            bisect.insort_right(self.__sorted_toys_for_random_search, (toy_timestamp, toy))
+            bisect.insort_left(self.__sorted_toys_for_random_search, (toy_timestamp, toy))
         
         # Insert into timestamp hash
         if not self.__timestamp_hash_toy_heap.has_key(toy_timestamp):
@@ -54,6 +53,27 @@ class ToyPool:
 
         heapq.heappush(self.__timestamp_hash_toy_heap[toy_timestamp], (toy_duration, toy))
 
+    def __sort_toypool_if_not_sorted(self):
+        if not self.__sorted_toys_for_random_search:
+            self.__sorted_toys_for_random_search.sort()
+
+    def pop(self):
+        """Enlève un jouet de la pile"""
+        # add to heap
+        toy_timestamp, toy = heapq.heappop(self.__base_heap)
+
+        # add to list for random search
+        self.__sort_toypool_if_not_sorted()
+
+
+        i = bisect.bisect(self.__sorted_toys_for_random_search, (toy_timestamp, toy))
+        del self.__sorted_toys_for_random_search[i-1]
+        
+        # Insert into timestamp hash
+        heapq.heappop(self.__timestamp_hash_toy_heap[toy_timestamp])
+
+        # On retourne le jouet
+        return toy
 
     def add_file_content(self, toy_file, num_toys=None):
         """Ajout de jouets Ã  partir d'un fichier"""
@@ -103,6 +123,8 @@ class ToyPoolTest(unittest.TestCase):
     def test_pop_random_toy_for_elf(self):
         elf = Elf(1)
         elf.set_next_available_time(datetime.datetime(2014, 1, 1, 11, 40))
+
+        self.assertEqual(elf.get_available_time_in_minutes(), (11*60)+40)
 
         toy1 = Toy(1, "2014 1 1 8 0", 50)
         toy2 = Toy(2, "2014 1 1 10 30", 20)

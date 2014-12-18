@@ -44,7 +44,21 @@ class Toy:
             return False
 
     def get_min_possible_working_start_time(self):
-        pass
+        """Selon l'heure d'arrivée, retourne le timestamp minimum de début de travail"""
+        current_date = self.reference_start_time + datetime.timedelta(minutes=self.arrival_minute)
+        year = current_date.year
+        month = current_date.month
+        day = current_date.day
+        hour = current_date.hour
+        minute = current_date.minute
+
+        if hour < 9:
+            return datetime.datetime(year, month, day, 9, 0, 0)
+        elif hour >= 19 and minute > 0:
+            return datetime.datetime(year, month, day, 9, 0, 0) + datetime.timedelta(days=1)
+        else:
+            return current_date
+        
 
 class ToyTest(unittest.TestCase):
 
@@ -52,11 +66,13 @@ class ToyTest(unittest.TestCase):
         self.toy1 = Toy(1, "2014 1 1 2 0", 600)
         self.toy2 = Toy(2, "2014 1 1 9 30", 600)
         self.toy3 = Toy(3, "2014 1 1 19 30", 600)
+        self.toy4 = Toy(3, "2014 1 1 19 00", 300)
 
     def test_get_min_possible_working_start_time(self):
         self.assertEqual(self.toy1.get_min_possible_working_start_time(), datetime.datetime(2014, 1, 1, 9, 0))
         self.assertEqual(self.toy2.get_min_possible_working_start_time(), datetime.datetime(2014, 1, 1, 9, 30))
         self.assertEqual(self.toy3.get_min_possible_working_start_time(), datetime.datetime(2014, 1, 2, 9, 0))
+        self.assertEqual(self.toy4.get_min_possible_working_start_time(), datetime.datetime(2014, 1, 1, 19, 0))
 
 
 if __name__ == '__main__':
