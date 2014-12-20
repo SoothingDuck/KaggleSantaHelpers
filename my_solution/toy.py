@@ -18,7 +18,7 @@ class Toy:
     def __str__(self):
         return "Toy %s : Arrival %s, Duration %s, Completed %s" % (self.id, self.arrival_minute, self.duration, self.completed_minute)
 
-    def get_toy_duration(self):
+    def get_duration(self):
         """Renvoi la durée de création d'un objet"""
         return self.duration
 

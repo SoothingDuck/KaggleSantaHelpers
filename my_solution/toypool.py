@@ -6,6 +6,7 @@ import heapq
 import bisect
 import unittest
 import datetime
+import random
 
 from toy import Toy
 from elf import Elf
@@ -30,11 +31,27 @@ class ToyPool:
         """Retourne le nombre de jouets prÃ©sents dans le pool"""
         return len(self.__base_heap)
 
+    def pop_random_toy_for_elf(self, elf):
+        """Enleve un jouet au hasard disponible pour l'elfe"""
+        
+        # Timestamp de l'elfe
+        elf_timestamp = elf.get_available_time()
+
+        # On recupère l'indice max de l'objet dans la liste triée
+        i_max = bisect.bisect_right(self.__known_timestamps, elf_timestamp) 
+        print(self.__sorted_toys_for_random_search)
+        i = random.randint(0, i_max-1)
+
+        # Puis l'objet
+        toy_timestamp, toy = self.__sorted_toys_for_random_search.pop(i)
+
+
+
     def push(self, toy, unsorted=False):
         """Ajoute un jouet dans la liste"""
         # get timestamp for toy
         toy_timestamp = toy.get_min_possible_working_start_time()
-        toy_duration = toy.get_toy_duration()
+        toy_duration = toy.get_duration()
         
         # add to heap
         heapq.heappush(self.__base_heap, (toy_timestamp, toy))

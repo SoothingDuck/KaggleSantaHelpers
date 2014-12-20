@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import unittest
 import math
@@ -21,6 +22,22 @@ class Elf:
         current_available_time =  self.__time_base + datetime.timedelta(minutes=self.next_available_time)
         minutes_diff = int(((next_timestamp-current_available_time)/60).total_seconds())
         self.next_available_time = self.next_available_time + minutes_diff
+
+    def will_finish_toy_in_sanctionned_hours(self, toy):
+        """Retourne True si l'heure de fin de création du jouet est entre 9h et 19h"""
+        if toy.get_duration() > 600:
+            return False
+
+        toy_finish_timestamp = self.get_available_time() + datetime.timedelta(minutes=toy.get_duration())
+
+        if toy_finish_timestamp.hour > 19 or (toy_finish_timestamp.hour == 19 and toy_finish_timestamp.minute > 0):
+            return False
+
+        if toy_finish_timestamp.hour < 9:
+            return False
+
+        return True
+        
 
     def get_available_time_in_minutes(self):
         """Retourne le next available time"""
@@ -107,13 +124,6 @@ class ElfTest(unittest.TestCase):
 
         self.assertTrue(self.elf_productivity_1.will_finish_toy_in_sanctionned_hours(toy1))
         self.assertTrue(self.elf_productivity_2.will_finish_toy_in_sanctionned_hours(toy2))
-
-    def test_get_time_to_wait_for_toy(self):
-        toy1 = Toy(1, "2014 1 1 0 0", 600)
-        toy2 = Toy(1, "2014 1 10 0 0", 601)
-
-        self.elf_productivity_1.get_time_to_wait_for_toy(toy1)
-        self.elf_productivity_1.get_time_to_wait_for_toy(toy2)
 
 if __name__ == '__main__':
     unittest.main()
