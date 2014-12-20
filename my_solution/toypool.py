@@ -22,11 +22,22 @@ class ToyPool:
         # Hash of timestamp and heap of toys ordered by duration
         self.__hash_timestamp_toys = {}
 
+        # Nb of toys
+        self.__toy_counter = 0
+
+    def __len__(self):
+        """Retourne la taille du toy pool"""
+        return self.__toy_counter
+
     def empty(self):
         """Retourne True si la liste est vide"""
         return len(self.__known_timestamp_list) == 0
+    
+    def get_known_timestamp_list(self):
+        """Retourne la liste des timestamp contenant des objets"""
+        return(self.__known_timestamp_list)
 
-    def __update_known_timestamp_list_with_toy_timestamp(self, toy_timestamp):
+    def append_known_timestamp_list_with_toy_timestamp(self, toy_timestamp):
         """Met à jour la liste des timestamp"""
         # Binary search du timestamp
         i = bisect.bisect_left(self.__known_timestamp_list, toy_timestamp)
@@ -38,16 +49,27 @@ class ToyPool:
             # Sinon
             self.__known_timestamp_list.insert(i, toy_timestamp)
 
+    def append_hash_timestamp_toys_with(self, toy_timestamp, toy):
+        """Met à jour le hash"""
+        if not self.__hash_timestamp_toys.has_key(toy_timestamp):
+            self.__hash_timestamp_toys[toy_timestamp] = []
+
+        toy_duration = toy.get_duration()
+        heapq.heappush(self.__hash_timestamp_toys[toy_timestamp], (toy_duration, toy))
+
     def append(self, toy):
         """Ajoute un jouet dans la liste"""
         # Regarde le timestamp minimum à partir duquel un elfe pourrait travailler sur le jouet
         toy_timestamp = toy.get_min_possible_working_start_time()
 
         # Met à jour la liste des known timestamp si necessaire
-        self.__update_known_timestamp_list_with_toy_timestamp(toy_timestamp)
+        self.append_known_timestamp_list_with_toy_timestamp(toy_timestamp)
 
         # Met à jour le hash avec la queue correspondante
-        raise "A implémenter"
+        self.append_hash_timestamp_toys_with(toy_timestamp, toy)
+
+        # Met à jour le toy counter
+        self.__toy_counter += 1
 
 
     def add_file_content(self, toy_file, num_toys=None):
