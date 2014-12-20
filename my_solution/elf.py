@@ -8,49 +8,17 @@ from toy import Toy
 
 class Elf:
     """ Each Elf starts with a rating of 1.0 and are available at 09:00 on Jan 1.  """
-    def __init__(self, elfid):
+    def __init__(self, elfid, start_working_time = datetime.datetime(2014,1,1,9,0,0)):
         self.id = elfid
         self.rating = 1.0
-        self.next_available_time = 540  # Santa's Workshop opens Jan 1, 2014 9:00 (= 540 minutes)
+        self.next_available_working_time = start_working_time
         self.rating_increase = 1.02
         self.rating_decrease = 0.90
 
         self.__time_base = datetime.datetime(2014,1,1,0,0,0)
 
-    def set_next_available_time(self, next_timestamp):
-        """Deplace le next available time"""
-        current_available_time =  self.__time_base + datetime.timedelta(minutes=self.next_available_time)
-        minutes_diff = int(((next_timestamp-current_available_time)/60).total_seconds())
-        self.next_available_time = self.next_available_time + minutes_diff
-
-    def will_finish_toy_in_sanctionned_hours(self, toy):
-        """Retourne True si l'heure de fin de création du jouet est entre 9h et 19h"""
-        if toy.get_duration() > 600:
-            return False
-
-        toy_finish_timestamp = self.get_available_time() + datetime.timedelta(minutes=toy.get_duration())
-
-        if toy_finish_timestamp.hour > 19 or (toy_finish_timestamp.hour == 19 and toy_finish_timestamp.minute > 0):
-            return False
-
-        if toy_finish_timestamp.hour < 9:
-            return False
-
-        return True
-        
-
-    def get_available_time_in_minutes(self):
-        """Retourne le next available time"""
-        return self.next_available_time
-
     def __str__(self):
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.next_available_time)
-
-    def get_available_time(self):
-        return self.__time_base + datetime.timedelta(minutes=self.next_available_time)
-
-    def will_finish_toy_in_sanctionned_hours(self, toy):
-        pass
 
     def update_elf(self, hrs, toy, start_minute, duration):
         """ Updates the elf's productivity rating and next available time based on last toy completed.

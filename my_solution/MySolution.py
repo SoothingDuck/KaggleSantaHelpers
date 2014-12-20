@@ -35,9 +35,6 @@ if __name__ == '__main__':
     # Début de l'algorithme
     while not mytoypool.empty():
 
-        # Sort Toys available for working day
-        mytoypool.fill_till_day(working_date)
-
         # Apply strategy for all elves in pool 
         #  Pour chaque elfe:
         #   1 jouet au hasard parmi ceux disponibles
