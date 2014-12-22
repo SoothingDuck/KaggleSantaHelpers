@@ -38,6 +38,45 @@ class ToyPool:
         """Retourne la taille du toy pool"""
         return self.__toy_counter
 
+    def get_next_short_toy_for(self, elf):
+        """Retourne un jouet au hasard disponible pour l'elf"""
+        # Timestamp de l'elfe
+        elf_timestamp = elf.get_next_available_working_time()
+
+        # Indice max de la liste des timestamp
+        imax = bisect.bisect_right(self.__known_timestamp_list, elf_timestamp)
+
+        # Indice au hasard
+        i = random.randint(0, imax-1)
+
+        # Recuperation du timestamp
+        toy_timestamp = self.__known_timestamp_list[i]
+
+        # Recuperation du jouet dans la random heap
+        while True:
+            d, toy = heapq.heappop(self.__hash_duration_heap_by_timestamp[toy_timestamp])
+            if self.__hash_existence_by_id.has_key(toy):
+                break
+
+        # Suppression de l'existence hash
+        del self.__hash_existence_by_id[toy]
+
+        # Decrement counter
+        self.__hash_count[toy_timestamp] -= 1
+
+        # Mise à zero des élements
+        if self.__hash_count[toy_timestamp] == 0:
+            del self.__hash_count[toy_timestamp]
+            del self.__hash_random_heap_by_timestamp[toy_timestamp]
+            del self.__hash_duration_heap_by_timestamp[toy_timestamp]
+            del self.__known_timestamp_list[i]
+
+        # Mise à jour du compteur
+        self.__toy_counter -= 1
+
+        # On retourne le jouet
+        return toy
+
     def get_random_toy_for_elf(self, elf):
         """Retourne un jouet au hasard disponible pour l'elf"""
         # Timestamp de l'elfe
@@ -189,6 +228,27 @@ class ToyPoolTest(unittest.TestCase):
         self.toy_small_pool.append(self.toy2)
         self.toy_small_pool.append(self.toy3)
 
+
+    def test_get_next_short_toy_for(self):
+
+        elf = Elf(1, datetime.datetime(2014, 1, 1, 9, 11, 0))
+
+        pool = ToyPool()
+
+        toy1 = Toy(1, "2014 1 1 9 5 0", 1)
+        toy2 = Toy(2, "2014 1 1 9 5 0", 2)
+        toy3 = Toy(3, "2014 1 1 9 5 0", 10)
+        toy4 = Toy(4, "2014 1 1 9 10 0", 10)
+
+        pool.append(toy1)
+        pool.append(toy2)
+        pool.append(toy3)
+        pool.append(toy4)
+
+        self.assertEquals(pool.get_next_short_toy_for(elf), toy4)
+        self.assertEquals(pool.get_next_short_toy_for(elf), toy1)
+        self.assertEquals(pool.get_next_short_toy_for(elf), toy2)
+        self.assertEquals(pool.get_next_short_toy_for(elf), toy3)
 
     def test_empty(self):
         self.assertTrue(self.toy_empty_pool.empty())
