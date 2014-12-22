@@ -38,6 +38,13 @@ class ToyPool:
         """Retourne la taille du toy pool"""
         return self.__toy_counter
 
+    def toy_left_for_elf(self, elf):
+        """Il reste des jouets pour l'elfe"""
+        next_working_time = elf.get_next_available_working_time()
+
+        return next_working_time >= self.__known_timestamp_list[0]
+
+
     def get_next_short_toy_for(self, elf):
         """Retourne un jouet au hasard disponible pour l'elf"""
         # Timestamp de l'elfe
@@ -86,7 +93,13 @@ class ToyPool:
         imax = bisect.bisect_right(self.__known_timestamp_list, elf_timestamp)
 
         # Indice au hasard
-        i = random.randint(0, imax-1)
+        try:
+            i = random.randint(0, imax-1)
+        except:
+            print(i)
+            print(imax)
+            print(elf_timestamp, self.__known_timestamp_list)
+            raise
 
         # Recuperation du timestamp
         toy_timestamp = self.__known_timestamp_list[i]
@@ -228,6 +241,21 @@ class ToyPoolTest(unittest.TestCase):
         self.toy_small_pool.append(self.toy2)
         self.toy_small_pool.append(self.toy3)
 
+    def test_toy_left_for_elf(self):
+
+        elf = Elf(1, datetime.datetime(2014, 1, 1, 9, 5, 0))
+
+        pool = ToyPool()
+
+        toy1 = Toy(1, "2014 1 1 9 6", 600)
+
+        pool.append(toy1)
+
+        self.assertFalse(pool.toy_left_for_elf(elf))
+
+        toy2 = Toy(2, "2014 1 1 9 4", 60)
+
+        self.assertFalse(pool.toy_left_for_elf(elf))
 
     def test_get_next_short_toy_for(self):
 

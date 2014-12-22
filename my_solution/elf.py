@@ -26,6 +26,7 @@ class Elf:
     def __str__(self):
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.get_next_available_working_time())
 
+
     def make_toy(self, toy, wcsv):
         """Fait un jouet"""
 
@@ -85,12 +86,11 @@ class Elf:
         else:
         # Cas 2 : L'elfe ne dispose d'assez de temps pour réaliser le jouet dans la journée
             while True:
-                short_toy = thetoypool.get_next_short_toy_for(elf)
+                short_toy = thetoypool.get_next_short_toy_for(self)
                 if self.will_finish_toy_in_sanctionned_hours(short_toy):
                     self.make_toy(short_toy, wcsv)
                 else:
                     self.make_toy(short_toy, wcsv)
-                    self.wait_till_next_day()
                     self.make_toy(toy, wcsv)
                     break
 
@@ -193,6 +193,7 @@ class ElfTest(unittest.TestCase):
         self.assertEqual(elf.get_next_available_working_time(), datetime.datetime(2014,1,1,9,0,0))
         elf.set_next_available_working_time(datetime.datetime(2014, 1, 1, 11, 40))
         self.assertEqual(elf.get_next_available_working_time(), datetime.datetime(2014,1,1,11,40,0))
+
 
     def test_make_toy(self):
         elf1 = Elf(1, datetime.datetime(2014, 1, 1, 9, 0, 0))
