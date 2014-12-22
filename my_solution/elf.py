@@ -14,12 +14,46 @@ class Elf:
         self.next_available_working_time = start_working_time
         self.rating_increase = 1.02
         self.rating_decrease = 0.90
+        
+        self.hrs = hrs.Hours()
 
         self.__time_base = datetime.datetime(2014,1,1,0,0,0)
 
     def __str__(self):
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.get_next_available_working_time())
 
+    def make_toy(self, toy):
+        """Fait un jouet"""
+
+        # Mise à jour next available time
+        current_available_working_time = self.get_next_available_working_time()
+        start_minute = int(((current_available_working_time-self.__time_base).seconds)/60)
+        toy_duration = toy.get_duration()
+        toy_required_minutes = int(math.ceil(toy_duration / self.rating))
+
+        sanctioned, unsanctioned = self.hrs.get_sanctioned_breakdown(start_minute, toy_required_minutes)
+
+        # enforce resting time based on the end_minute and the unsanctioned minutes that
+        # need to be accounted for.
+        end_minute = start_minute + toy_required_minutes
+        if unsanctioned == 0:
+            if self.hrs.is_sanctioned_time(end_minute):
+                #self.next_available_time = end_minute
+                self.set_next_available_working_time(current_available_working_time+datetime.timedelta(minutes=end_minute-start_minute))
+            else:
+                #self.next_available_time = self.hrs.next_sanctioned_minute(end_minute)
+                self.set_next_available_working_time(current_available_working_time+datetime.timedelta(minutes=self.hrs.next_sanctioned_minute(end_minute)-start_minute))
+        else:
+            #self.next_available_time = self.hrs.apply_resting_period(end_minute, unsanctioned)
+            self.set_next_available_working_time(current_available_working_time+datetime.timedelta(minutes=self.hrs.apply_resting_period(end_minute, unsanctioned)-start_minute))
+
+        # Mise à jour productivité
+        self.rating = max(0.25,
+                          min(4.0, self.rating * (self.rating_increase ** (sanctioned/60.0)) *
+                              (self.rating_decrease ** (unsanctioned/60.0))))
+
+        # Ecriture du jouet
+        print(toy)
 
     def set_rating(self, rating):
         """Met à jour manuellement le rating de l'elfe"""
@@ -156,13 +190,13 @@ class ElfTest(unittest.TestCase):
         toy3 = Toy(3, "2014 1 1 0 0", 1)
 
         elf1.make_toy(toy1)
-        self.assertEquals(elf1.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 19, 0, 0))
+        self.assertEquals(elf1.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 0, 0))
 
         elf1.make_toy(toy3)
         self.assertEquals(elf1.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 1, 0))
 
         elf2.make_toy(toy2)
-        self.assertEquals(elf2.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 14, 0, 0))
+        self.assertEquals(elf2.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 14, 0, 0))
 
     def test_will_finish_toy_in_sanctionned_hours(self):
         toy1 = Toy(1, "2014 1 1 0 0", 600)
