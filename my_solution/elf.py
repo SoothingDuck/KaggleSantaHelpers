@@ -27,6 +27,15 @@ class Elf:
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.get_next_available_working_time())
 
 
+    def tick_to_next_minute(self):
+        """Avance à la prochaine minute disponible de l'elfe"""
+        available_time = self.get_next_available_working_time()
+
+        if available_time.hour == 18 and available_time.minute == 59:
+            self.next_available_working_time = available_time + datetime.timedelta(minutes=9*60+5*60+1)
+        else:
+            self.next_available_working_time = available_time + datetime.timedelta(minutes=1)
+
     def make_toy(self, toy, wcsv):
         """Fait un jouet"""
 
@@ -223,6 +232,21 @@ class ElfTest(unittest.TestCase):
 
         self.assertTrue(self.elf_productivity_2.will_finish_toy_in_sanctionned_hours(toy1))
         self.assertTrue(self.elf_productivity_2.will_finish_toy_in_sanctionned_hours(toy2))
+
+    def test_tick_to_next_minute(self):
+
+        elf = Elf(1, datetime.datetime(2014, 1, 1, 18, 58, 0))
+
+        self.assertEquals(elf.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 18, 58))
+
+        elf.tick_to_next_minute()
+        self.assertEquals(elf.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 18, 59))
+
+        elf.tick_to_next_minute()
+        self.assertEquals(elf.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 0))
+
+        elf.tick_to_next_minute()
+        self.assertEquals(elf.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 1))
 
 if __name__ == '__main__':
     unittest.main()

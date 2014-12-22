@@ -44,7 +44,6 @@ class ToyPool:
 
         return next_working_time >= self.__known_timestamp_list[0]
 
-
     def get_next_short_toy_for(self, elf):
         """Retourne un jouet au hasard disponible pour l'elf"""
         # Timestamp de l'elfe
