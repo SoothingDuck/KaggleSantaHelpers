@@ -22,7 +22,7 @@ class Elf:
     def __str__(self):
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.get_next_available_working_time())
 
-    def make_toy(self, toy):
+    def make_toy(self, toy, wcsv):
         """Fait un jouet"""
 
         # Mise à jour next available time
@@ -54,12 +54,15 @@ class Elf:
 
         # Ecriture du jouet
         print(toy)
+        tt = datetime.datetime(2014, 1, 1, 0, 0) + datetime.timedelta(seconds=60*start_minute)
+        time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
+        wcsv.writerow([toy.id, self.id, time_string, toy_required_minutes])
 
     def set_rating(self, rating):
         """Met à jour manuellement le rating de l'elfe"""
         self.rating = rating
 
-    def apply_strategy_for(self, thetoypool, theelfpool):
+    def apply_strategy_for(self, thetoypool, theelfpool, wcsv):
         """Procedure la plus complexe, applique la stratégie de l'elfe selectionné pour un toypool et un elfpool donné"""
         print(self)
         # Recupération d'un jouet au hasard dans le toy pool que l'elfe pourrai faire
@@ -69,17 +72,17 @@ class Elf:
 
         # Cas 1 : L'elfe dispose d'assez de temps pour réaliser le jouet dans la journée
         if(self.will_finish_toy_in_sanctionned_hours(toy)):
-            self.make_toy(toy)
+            self.make_toy(toy, wcsv)
         else:
         # Cas 2 : L'elfe ne dispose d'assez de temps pour réaliser le jouet dans la journée
             while True:
                 short_toy = thetoypool.get_next_short_toy_for(elf)
                 if self.will_finish_toy_in_sanctionned_hours(short_toy):
-                    self.make_toy(short_toy)
+                    self.make_toy(short_toy, wcsv)
                 else:
-                    self.make_toy(short_toy)
+                    self.make_toy(short_toy, wcsv)
                     self.wait_till_next_day()
-                    self.make_toy(toy)
+                    self.make_toy(toy, wcsv)
                     break
 
         # On remet l'elfe dans le pool avec sa nouvelle date de disponibilité
@@ -171,6 +174,9 @@ class ElfTest(unittest.TestCase):
         self.elf_productivity_2 = Elf(2)
         self.elf_productivity_3 = Elf(3)
         self.elf_productivity_2.set_rating(2)
+
+        soln_file = os.path.join(os.getcwd(), 'test.csv')
+        self.wcsv = csv.writer(open(soln_file, "wb"))
 
 
     def test_get_available_time(self):

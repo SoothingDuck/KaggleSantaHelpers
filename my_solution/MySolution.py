@@ -33,6 +33,11 @@ if __name__ == '__main__':
     mytoypool = ToyPool()
     mytoypool.add_file_content(toy_file, NUM_TOYS)
 
+    # Fichier dans lequel logger la solution
+    w = open(soln_file, 'wb')
+    wcsv = csv.writer(w)
+    wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
+
     # Début de l'algorithme
     while not mytoypool.empty():
 
@@ -43,10 +48,12 @@ if __name__ == '__main__':
         #   Sinon planifier l'objet pour le lendemain matin et le traiter et remplir le reste de la journée avec des objets "courts"
         while not myelfpool.empty_for_date(working_date):
             elf = myelfpool.next_available_elf()
-            elf.apply_strategy_for(mytoypool, myelfpool)
+            elf.apply_strategy_for(mytoypool, myelfpool, wcsv)
 
         # Go to next working date
         working_date = working_date + datetime.timedelta(days=1)
 
+    # Fermeture du fichier
+    wcsv.close()
 
     print 'total runtime = {0}'.format(time.time() - start)
