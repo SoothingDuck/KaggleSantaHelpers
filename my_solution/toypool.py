@@ -29,6 +29,41 @@ class ToyPool:
         """Retourne la taille du toy pool"""
         return self.__toy_counter
 
+    def get_random_toy_for_elf(self, elf):
+        """Retourne un jouet au hasard disponible pour l'elf"""
+        # Timestamp de l'elfe
+        elf_timestamp = elf.get_next_available_working_time()
+
+        # Indice max de la liste des timestamp
+        imax = bisect.bisect_right(self.__known_timestamp_list, elf_timestamp)
+
+        # Indice au hasard
+        i = random.randint(0, imax-1)
+
+        # Recuperation du timestamp
+        toy_timestamp = self.__known_timestamp_list[i]
+
+        # Recuperation d'un indice de jouet au hasard
+        toy_indice = random.randint(0, len(self.__hash_timestamp_toys[toy_timestamp])-1) 
+
+        # Recuperation du jouet
+        duration, toy = self.__hash_timestamp_toys[toy_timestamp].pop(toy_indice)
+
+        # Cas 1 : la liste est vide
+        if len(self.__hash_timestamp_toys[toy_timestamp]) == 0:
+            del self.__hash_timestamp_toys[toy_timestamp]
+            del self.__known_timestamp_list[i]
+        else:
+        # Cas 2 : Reheap
+            heapq.heapify(self.__hash_timestamp_toys[toy_timestamp])
+
+        # Mise à jour du compteur
+        self.__toy_counter -= 1
+
+        # On retourne le jouet
+        return toy
+
+
     def empty(self):
         """Retourne True si la liste est vide"""
         return len(self.__known_timestamp_list) == 0
@@ -100,9 +135,31 @@ class ToyPoolTest(unittest.TestCase):
         self.toy_filled_pool = ToyPool()
         self.toy_filled_pool.add_file_content(toy_file, 10)
 
+        self.elf = Elf(1, datetime.datetime(2014, 1, 1, 9, 0, 0))
+        self.toy_small_pool = ToyPool()
+        self.toy1 = Toy(1, "2014 1 1 8 0", 600)
+        self.toy2 = Toy(2, "2014 1 1 9 3", 60)
+        self.toy3 = Toy(3, "2014 1 1 10 0", 2)
+        self.toy_small_pool.append(self.toy1)
+        self.toy_small_pool.append(self.toy2)
+        self.toy_small_pool.append(self.toy3)
+
 
     def test_empty(self):
         self.assertTrue(self.toy_empty_pool.empty())
+
+
+    def test_get_random_toy_for_elf(self):
+        """Jouet au hasard parmi ceux disponibles"""
+        self.assertEquals(len(self.toy_small_pool), 3)
+
+        random_toy = self.toy_small_pool.get_random_toy_for_elf(self.elf)  
+
+        self.assertTrue(random_toy not in (self.toy2, self.toy3))
+        self.assertEquals(random_toy, self.toy1)
+
+        self.assertEquals(len(self.toy_small_pool), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

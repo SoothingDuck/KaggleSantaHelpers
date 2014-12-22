@@ -20,6 +20,17 @@ class Elf:
     def __str__(self):
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.next_available_time)
 
+
+    def apply_strategy_for(self, thetoypool, theelfpool):
+        """Procedure la plus complexe, applique la stratégie de l'elfe selectionné pour un toypool et un elfpool donné"""
+        # Recupération d'un jouet au hasard dans le toy pool que l'elfe pourrai faire
+        toy = thetoypool.get_random_toy_for_elf(self)
+
+
+        # Cas 1 : L'elfe dispose d'assez de temps pour réaliser le jouet dans la journée
+
+        # Cas 2 : L'elfe ne dispose d'assez de temps pour réaliser le jouet dans la journée
+
     def get_next_available_working_time(self):
         """Recupere le prochain timestamp de disponibilite de l'elfe"""
         return self.next_available_working_time
