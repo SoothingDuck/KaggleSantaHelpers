@@ -145,6 +145,25 @@ class ElfTest(unittest.TestCase):
         elf.set_next_available_working_time(datetime.datetime(2014, 1, 1, 11, 40))
         self.assertEqual(elf.get_next_available_working_time(), datetime.datetime(2014,1,1,11,40,0))
 
+    def test_make_toy(self):
+        elf1 = Elf(1, datetime.datetime(2014, 1, 1, 9, 0, 0))
+        elf2 = Elf(2, datetime.datetime(2014, 1, 1, 9, 0, 0))
+
+        elf2.set_rating(2)
+
+        toy1 = Toy(1, "2014 1 1 0 0", 600)
+        toy2 = Toy(2, "2014 1 1 0 0", 600)
+        toy3 = Toy(3, "2014 1 1 0 0", 1)
+
+        elf1.make_toy(toy1)
+        self.assertEquals(elf1.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 19, 0, 0))
+
+        elf1.make_toy(toy3)
+        self.assertEquals(elf1.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 1, 0))
+
+        elf2.make_toy(toy2)
+        self.assertEquals(elf2.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 14, 0, 0))
+
     def test_will_finish_toy_in_sanctionned_hours(self):
         toy1 = Toy(1, "2014 1 1 0 0", 600)
         toy2 = Toy(1, "2014 1 1 0 0", 601)
