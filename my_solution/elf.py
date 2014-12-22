@@ -83,6 +83,11 @@ class Elf:
 
     def apply_strategy_for(self, thetoypool, theelfpool, wcsv):
         """Procedure la plus complexe, applique la stratégie de l'elfe selectionné pour un toypool et un elfpool donné"""
+        # Si rien on sort
+        if len(thetoypool) == 0:
+            theelfpool.add_elf(self)
+            return
+
         # print(self)
         # Recupération d'un jouet au hasard dans le toy pool que l'elfe pourrai faire
         toy = thetoypool.get_random_toy_for_elf(self)
@@ -96,6 +101,7 @@ class Elf:
         # Cas 2 : L'elfe ne dispose d'assez de temps pour réaliser le jouet dans la journée
             while True:
                 short_toy = thetoypool.get_next_short_toy_for(self)
+
                 if self.will_finish_toy_in_sanctionned_hours(short_toy):
                     self.make_toy(short_toy, wcsv)
                 else:
@@ -109,6 +115,7 @@ class Elf:
     def set_next_available_working_time(self, thetimestamp):
         """Mets à jour manuellement le working time"""
         self.next_available_working_time = thetimestamp
+        self.next_available_time = int(((thetimestamp-self.__time_base).seconds)/60)
 
     def get_next_available_working_time(self):
         """Recupere le prochain timestamp de disponibilite de l'elfe"""
@@ -207,12 +214,14 @@ class ElfTest(unittest.TestCase):
     def test_make_toy(self):
         elf1 = Elf(1, datetime.datetime(2014, 1, 1, 9, 0, 0))
         elf2 = Elf(2, datetime.datetime(2014, 1, 1, 9, 0, 0))
+        elf3 = Elf(3, datetime.datetime(2014, 1, 1, 18, 59, 0))
 
         elf2.set_rating(2)
 
         toy1 = Toy(1, "2014 1 1 0 0", 600)
         toy2 = Toy(2, "2014 1 1 0 0", 600)
         toy3 = Toy(3, "2014 1 1 0 0", 1)
+        toy4 = Toy(4, "2014 1 1 0 0", 2)
 
         elf1.make_toy(toy1, self.wcsv)
         self.assertEquals(elf1.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 0, 0))
@@ -222,6 +231,9 @@ class ElfTest(unittest.TestCase):
 
         elf2.make_toy(toy2, self.wcsv)
         self.assertEquals(elf2.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 14, 0, 0))
+
+        elf3.make_toy(toy4, self.wcsv)
+        self.assertEquals(elf3.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 1, 0))
 
     def test_will_finish_toy_in_sanctionned_hours(self):
         toy1 = Toy(1, "2014 1 1 0 0", 600)

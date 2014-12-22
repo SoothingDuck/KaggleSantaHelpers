@@ -41,11 +41,14 @@ class ToyPool:
     def toy_left_for_elf(self, elf):
         """Il reste des jouets pour l'elfe"""
         next_working_time = elf.get_next_available_working_time()
-
-        return next_working_time >= self.__known_timestamp_list[0]
+        return (next_working_time >= self.__known_timestamp_list[0])
 
     def get_next_short_toy_for(self, elf):
         """Retourne un jouet au hasard disponible pour l'elf"""
+        # Loop tant qu'on n'a rien de disponible
+        while not self.toy_left_for_elf(elf):
+            elf.tick_to_next_minute()
+
         # Timestamp de l'elfe
         elf_timestamp = elf.get_next_available_working_time()
 
@@ -85,6 +88,11 @@ class ToyPool:
 
     def get_random_toy_for_elf(self, elf):
         """Retourne un jouet au hasard disponible pour l'elf"""
+
+        # Loop tant qu'on n'a rien de disponible
+        while not self.toy_left_for_elf(elf):
+            elf.tick_to_next_minute()
+
         # Timestamp de l'elfe
         elf_timestamp = elf.get_next_available_working_time()
 
@@ -95,7 +103,6 @@ class ToyPool:
         try:
             i = random.randint(0, imax-1)
         except:
-            print(i)
             print(imax)
             print(elf_timestamp, self.__known_timestamp_list)
             raise
@@ -246,15 +253,14 @@ class ToyPoolTest(unittest.TestCase):
 
         pool = ToyPool()
 
-        toy1 = Toy(1, "2014 1 1 9 6", 600)
+        toy1 = Toy(1, "2014 1 1 9 5", 600)
+        toy2 = Toy(2, "2014 1 1 9 6", 60)
 
         pool.append(toy1)
+        pool.append(toy2)
 
-        self.assertFalse(pool.toy_left_for_elf(elf))
+        self.assertTrue(pool.toy_left_for_elf(elf))
 
-        toy2 = Toy(2, "2014 1 1 9 4", 60)
-
-        self.assertFalse(pool.toy_left_for_elf(elf))
 
     def test_get_next_short_toy_for(self):
 
