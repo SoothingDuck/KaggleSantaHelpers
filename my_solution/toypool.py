@@ -64,11 +64,11 @@ class ToyPool:
         # Recuperation du jouet dans la random heap
         while True:
             d, toy = heapq.heappop(self.__hash_duration_heap_by_timestamp[toy_timestamp])
-            if self.__hash_existence_by_id.has_key(toy):
+            if self.__hash_existence_by_id.has_key(toy.id):
                 break
 
         # Suppression de l'existence hash
-        del self.__hash_existence_by_id[toy]
+        del self.__hash_existence_by_id[toy.id]
 
         # Decrement counter
         self.__hash_count[toy_timestamp] -= 1
@@ -113,11 +113,11 @@ class ToyPool:
         # Recuperation du jouet dans la random heap
         while True:
             r, toy = heapq.heappop(self.__hash_random_heap_by_timestamp[toy_timestamp])
-            if self.__hash_existence_by_id.has_key(toy):
+            if self.__hash_existence_by_id.has_key(toy.id):
                 break
 
         # Suppression de l'existence hash
-        del self.__hash_existence_by_id[toy]
+        del self.__hash_existence_by_id[toy.id]
 
         # Decrement counter
         self.__hash_count[toy_timestamp] -= 1
@@ -201,7 +201,7 @@ class ToyPool:
         self.append_hash_duration_heap_by_timestamp(toy)
 
         # Met à jour le hash existence
-        self.__hash_existence_by_id[toy] = 1
+        self.__hash_existence_by_id[toy.id] = 1
 
         # Met à jour le hash compteur
         self.append_hash_count_by_timestamp(toy)
