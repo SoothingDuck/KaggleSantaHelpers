@@ -16,7 +16,7 @@ class Toy:
         self.__time_base = datetime.datetime(2014, 1, 1, 0, 0)
 
     def __str__(self):
-        return "Toy %s : Arrival %s, Duration %s, Completed %s" % (self.id, self.arrival_minute, self.duration, self.completed_minute)
+        return "Toy %s : Min Start Working Time %s, Duration %s, Completed %s" % (self.id, self.get_min_possible_working_start_time(), self.duration, self.completed_minute)
 
     def get_duration(self):
         """Renvoi la durée de création d'un objet"""

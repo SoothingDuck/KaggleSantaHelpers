@@ -18,22 +18,68 @@ class Elf:
         self.__time_base = datetime.datetime(2014,1,1,0,0,0)
 
     def __str__(self):
-        return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.next_available_time)
+        return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.get_next_available_working_time())
 
+
+    def set_rating(self, rating):
+        """Met à jour manuellement le rating de l'elfe"""
+        self.rating = rating
 
     def apply_strategy_for(self, thetoypool, theelfpool):
         """Procedure la plus complexe, applique la stratégie de l'elfe selectionné pour un toypool et un elfpool donné"""
+        print(self)
         # Recupération d'un jouet au hasard dans le toy pool que l'elfe pourrai faire
         toy = thetoypool.get_random_toy_for_elf(self)
-
+        print(len(thetoypool), len(theelfpool))
+        print(toy)
 
         # Cas 1 : L'elfe dispose d'assez de temps pour réaliser le jouet dans la journée
-
+        if(self.will_finish_toy_in_sanctionned_hours(toy)):
+            self.make_toy(toy)
+        else:
         # Cas 2 : L'elfe ne dispose d'assez de temps pour réaliser le jouet dans la journée
+            while True:
+                short_toy = thetoypool.get_next_short_toy_for(elf)
+                if self.will_finish_toy_in_sanctionned_hours(short_toy):
+                    self.make_toy(short_toy)
+                else:
+                    self.make_toy(short_toy)
+                    self.wait_till_next_day()
+                    self.make_toy(toy)
+                    break
+
+        # On remet l'elfe dans le pool avec sa nouvelle date de disponibilité
+        theelfpool.add_elf(self)
+
+    def set_next_available_working_time(self, thetimestamp):
+        """Mets à jour manuellement le working time"""
+        self.next_available_working_time = thetimestamp
 
     def get_next_available_working_time(self):
         """Recupere le prochain timestamp de disponibilite de l'elfe"""
         return self.next_available_working_time
+
+    def will_finish_toy_in_sanctionned_hours(self, toy):
+        """Le jouet va-t-il être fini dans les heures ouvrées"""
+        elf_working_timestamp = self.get_next_available_working_time()
+        
+        toy_duration = toy.get_duration()
+
+        toy_required_minutes = int(math.ceil(toy_duration / self.rating))
+
+        if toy_required_minutes > 600:
+            return False
+        else:
+            next_elf_working_timestamp = elf_working_timestamp + datetime.timedelta(minutes=toy_required_minutes)
+            if next_elf_working_timestamp.date() > elf_working_timestamp.date():
+                return False
+            else:
+                if next_elf_working_timestamp.hour == 19 and next_elf_working_timestamp.minute == 0:
+                    return True
+                elif next_elf_working_timestamp.hour < 19:
+                    return True
+                else:
+                    return False
 
     def update_elf(self, hrs, toy, start_minute, duration):
         """ Updates the elf's productivity rating and next available time based on last toy completed.
@@ -89,14 +135,15 @@ class ElfTest(unittest.TestCase):
     def setUp(self):
         self.elf_productivity_1 = Elf(1)
         self.elf_productivity_2 = Elf(2)
-        self.elf_productivity_2.rating = 2
+        self.elf_productivity_3 = Elf(3)
+        self.elf_productivity_2.set_rating(2)
 
 
     def test_get_available_time(self):
         elf = Elf(1)
-        self.assertEqual(elf.get_available_time(), datetime.datetime(2014,1,1,9,0,0))
-        elf.set_next_available_time(datetime.datetime(2014, 1, 1, 11, 40))
-        self.assertEqual(elf.get_available_time(), datetime.datetime(2014,1,1,11,40,0))
+        self.assertEqual(elf.get_next_available_working_time(), datetime.datetime(2014,1,1,9,0,0))
+        elf.set_next_available_working_time(datetime.datetime(2014, 1, 1, 11, 40))
+        self.assertEqual(elf.get_next_available_working_time(), datetime.datetime(2014,1,1,11,40,0))
 
     def test_will_finish_toy_in_sanctionned_hours(self):
         toy1 = Toy(1, "2014 1 1 0 0", 600)
@@ -105,7 +152,7 @@ class ElfTest(unittest.TestCase):
         self.assertTrue(self.elf_productivity_1.will_finish_toy_in_sanctionned_hours(toy1))
         self.assertFalse(self.elf_productivity_1.will_finish_toy_in_sanctionned_hours(toy2))
 
-        self.assertTrue(self.elf_productivity_1.will_finish_toy_in_sanctionned_hours(toy1))
+        self.assertTrue(self.elf_productivity_2.will_finish_toy_in_sanctionned_hours(toy1))
         self.assertTrue(self.elf_productivity_2.will_finish_toy_in_sanctionned_hours(toy2))
 
 if __name__ == '__main__':
