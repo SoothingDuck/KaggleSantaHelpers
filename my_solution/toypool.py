@@ -19,8 +19,17 @@ class ToyPool:
         # List of known timestamp
         self.__known_timestamp_list = []
 
-        # Hash of timestamp and heap of toys ordered by duration
-        self.__hash_timestamp_toys = {}
+        # Hash timestamp count
+        self.__hash_count = {}
+
+        # Random heap by timestamp
+        self.__hash_random_heap_by_timestamp = {}
+
+        # Duration heap by timestamp
+        self.__hash_duration_heap_by_timestamp = {}
+
+        # Existence Hash by toy id
+        self.__hash_existence_by_id = {}
 
         # Nb of toys
         self.__toy_counter = 0
@@ -43,19 +52,24 @@ class ToyPool:
         # Recuperation du timestamp
         toy_timestamp = self.__known_timestamp_list[i]
 
-        # Recuperation d'un indice de jouet au hasard
-        toy_indice = random.randint(0, len(self.__hash_timestamp_toys[toy_timestamp])-1) 
+        # Recuperation du jouet dans la random heap
+        while True:
+            r, toy = heapq.heappop(self.__hash_random_heap_by_timestamp[toy_timestamp])
+            if self.__hash_existence_by_id.has_key(toy):
+                break
 
-        # Recuperation du jouet
-        duration, toy = self.__hash_timestamp_toys[toy_timestamp].pop(toy_indice)
+        # Suppression de l'existence hash
+        del self.__hash_existence_by_id[toy]
 
-        # Cas 1 : la liste est vide
-        if len(self.__hash_timestamp_toys[toy_timestamp]) == 0:
-            del self.__hash_timestamp_toys[toy_timestamp]
+        # Decrement counter
+        self.__hash_count[toy_timestamp] -= 1
+
+        # Mise à zero des élements
+        if self.__hash_count[toy_timestamp] == 0:
+            del self.__hash_count[toy_timestamp]
+            del self.__hash_random_heap_by_timestamp[toy_timestamp]
+            del self.__hash_duration_heap_by_timestamp[toy_timestamp]
             del self.__known_timestamp_list[i]
-        else:
-        # Cas 2 : Reheap
-            heapq.heapify(self.__hash_timestamp_toys[toy_timestamp])
 
         # Mise à jour du compteur
         self.__toy_counter -= 1
@@ -84,24 +98,55 @@ class ToyPool:
             # Sinon
             self.__known_timestamp_list.insert(i, toy_timestamp)
 
-    def append_hash_timestamp_toys_with(self, toy_timestamp, toy):
+    def append_hash_count_by_timestamp(self, toy):
         """Met à jour le hash"""
-        if not self.__hash_timestamp_toys.has_key(toy_timestamp):
-            self.__hash_timestamp_toys[toy_timestamp] = []
+        toy_timestamp = toy.get_min_possible_working_start_time()
 
+        if not self.__hash_count.has_key(toy_timestamp):
+            self.__hash_count[toy_timestamp] = 0
+
+        self.__hash_count[toy_timestamp] += 1
+
+    def append_hash_duration_heap_by_timestamp(self, toy):
+        """Met à jour le hash"""
+        toy_timestamp = toy.get_min_possible_working_start_time()
         toy_duration = toy.get_duration()
-        heapq.heappush(self.__hash_timestamp_toys[toy_timestamp], (toy_duration, toy))
+
+        if not self.__hash_duration_heap_by_timestamp.has_key(toy_timestamp):
+            self.__hash_duration_heap_by_timestamp[toy_timestamp] = []
+
+        heapq.heappush(self.__hash_duration_heap_by_timestamp[toy_timestamp], (toy_duration, toy))
+
+    def append_hash_random_heap_by_timestamp(self, toy):
+        """Met à jour le hash"""
+        toy_timestamp = toy.get_min_possible_working_start_time()
+
+        if not self.__hash_random_heap_by_timestamp.has_key(toy_timestamp):
+            self.__hash_random_heap_by_timestamp[toy_timestamp] = []
+
+        r = random.random()
+        heapq.heappush(self.__hash_random_heap_by_timestamp[toy_timestamp], (r, toy))
 
     def append(self, toy):
         """Ajoute un jouet dans la liste"""
         # Regarde le timestamp minimum à partir duquel un elfe pourrait travailler sur le jouet
         toy_timestamp = toy.get_min_possible_working_start_time()
+        toy_id = toy.id
 
         # Met à jour la liste des known timestamp si necessaire
         self.append_known_timestamp_list_with_toy_timestamp(toy_timestamp)
 
-        # Met à jour le hash avec la queue correspondante
-        self.append_hash_timestamp_toys_with(toy_timestamp, toy)
+        # Met à jour le hash random avec la queue correspondante
+        self.append_hash_random_heap_by_timestamp(toy)
+
+        # Met à jour le hash duration avec la queue correspondante
+        self.append_hash_duration_heap_by_timestamp(toy)
+
+        # Met à jour le hash existence
+        self.__hash_existence_by_id[toy] = 1
+
+        # Met à jour le hash compteur
+        self.append_hash_count_by_timestamp(toy)
 
         # Met à jour le toy counter
         self.__toy_counter += 1
