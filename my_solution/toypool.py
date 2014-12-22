@@ -153,6 +153,7 @@ class ToyPoolTest(unittest.TestCase):
         """Jouet au hasard parmi ceux disponibles"""
         self.assertEquals(len(self.toy_small_pool), 3)
 
+        # Recupere un jouet au hasard => seul le 1 est disponible
         random_toy = self.toy_small_pool.get_random_toy_for_elf(self.elf)  
 
         self.assertTrue(random_toy not in (self.toy2, self.toy3))

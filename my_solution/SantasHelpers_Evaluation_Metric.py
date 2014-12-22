@@ -132,13 +132,15 @@ if __name__ == '__main__':
     start = time.time()
 
     NUM_TOYS = 100000
+    NUM_TOYS = 2000
     NUM_ELVES = 900
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
     myToys = read_toys(toy_file, NUM_TOYS)
     print ' -- All toys read. Starting to score submission. '
 
-    sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavail_%d.csv' % NUM_TOYS)
+    sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
+    #sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavail_%d.csv' % NUM_TOYS)
     #sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavailifproductive_%d.csv' % NUM_TOYS)
     #sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_bigqueue_%d.csv' % NUM_TOYS)
     hrs = Hours()

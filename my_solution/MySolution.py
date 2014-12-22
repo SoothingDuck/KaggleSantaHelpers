@@ -7,6 +7,7 @@ from elfpool import ElfPool
 import datetime
 import time
 import os
+import csv
 
 # ======================================================================= #
 # === MAIN === #
@@ -47,13 +48,14 @@ if __name__ == '__main__':
         #   Si on peut traiter l'objet dans la journée, le faire et mettre à jour la date de disponibilité de l'elfe
         #   Sinon planifier l'objet pour le lendemain matin et le traiter et remplir le reste de la journée avec des objets "courts"
         while not myelfpool.empty_for_date(working_date):
+            if mytoypool.empty():
+                break
+
+            print("TOYPOOL LEN : %d" % len(mytoypool))
             elf = myelfpool.next_available_elf()
             elf.apply_strategy_for(mytoypool, myelfpool, wcsv)
 
         # Go to next working date
         working_date = working_date + datetime.timedelta(days=1)
-
-    # Fermeture du fichier
-    wcsv.close()
 
     print 'total runtime = {0}'.format(time.time() - start)
