@@ -40,7 +40,7 @@ class Elf:
         # enforce resting time based on the end_minute and the unsanctioned minutes that
         # need to be accounted for.
         end_minute = start_minute + toy_required_minutes
-        print(start_minute, end_minute)
+        # print(start_minute, end_minute)
         if unsanctioned == 0:
             if self.hrs.is_sanctioned_time(end_minute):
                 #self.next_available_time = end_minute
@@ -58,14 +58,14 @@ class Elf:
                               (self.rating_decrease ** (unsanctioned/60.0))))
 
         # Ecriture du jouet
-        print(toy)
+        # print(toy)
         tt = datetime.datetime(2014, 1, 1, 0, 0) + datetime.timedelta(seconds=60*start_minute)
-        print "tt : %s" % tt
+        # print "tt : %s" % tt
         time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
         wcsv.writerow([toy.id, self.id, time_string, toy_required_minutes])
 
-        print(self)
-        print(self.get_next_available_working_time())
+        # print(self)
+        # print(self.get_next_available_working_time())
 
     def set_rating(self, rating):
         """Met à jour manuellement le rating de l'elfe"""
@@ -73,11 +73,11 @@ class Elf:
 
     def apply_strategy_for(self, thetoypool, theelfpool, wcsv):
         """Procedure la plus complexe, applique la stratégie de l'elfe selectionné pour un toypool et un elfpool donné"""
-        print(self)
+        # print(self)
         # Recupération d'un jouet au hasard dans le toy pool que l'elfe pourrai faire
         toy = thetoypool.get_random_toy_for_elf(self)
-        print(len(thetoypool), len(theelfpool))
-        print(toy)
+        # print(len(thetoypool), len(theelfpool))
+        # print(toy)
 
         # Cas 1 : L'elfe dispose d'assez de temps pour réaliser le jouet dans la journée
         if(self.will_finish_toy_in_sanctionned_hours(toy)):
