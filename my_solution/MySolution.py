@@ -26,7 +26,8 @@ if __name__ == '__main__':
     soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
 
     # Création du pool d'elfes
-    myelfpool = ElfPool(NUM_ELVES)
+    myelfpool = ElfPool()
+    myelfpool.init_with(NUM_ELVES)
 
     # Création du pool de jouets
     mytoypool = ToyPool()
@@ -42,7 +43,7 @@ if __name__ == '__main__':
         #   Sinon planifier l'objet pour le lendemain matin et le traiter et remplir le reste de la journée avec des objets "courts"
         while not myelfpool.empty_for_date(working_date):
             elf = myelfpool.next_available_elf()
-            elf.apply_strategy_for(toypool)
+            elf.apply_strategy_for(mytoypool, myelfpool)
 
         # Go to next working date
         working_date = working_date + datetime.timedelta(days=1)

@@ -20,6 +20,10 @@ class Elf:
     def __str__(self):
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.next_available_time)
 
+    def get_next_available_working_time(self):
+        """Recupere le prochain timestamp de disponibilite de l'elfe"""
+        return self.next_available_working_time
+
     def update_elf(self, hrs, toy, start_minute, duration):
         """ Updates the elf's productivity rating and next available time based on last toy completed.
         :param hrs: Hours object for bookkeeping
