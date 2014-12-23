@@ -85,7 +85,6 @@ class Elf:
         """Procedure la plus complexe, applique la stratégie de l'elfe selectionné pour un toypool et un elfpool donné"""
         # Si rien on sort
         if len(thetoypool) == 0:
-            theelfpool.add_elf(self)
             return
 
         # print(self)
@@ -108,9 +107,6 @@ class Elf:
                     self.make_toy(short_toy, wcsv)
                     self.make_toy(toy, wcsv)
                     break
-
-        # On remet l'elfe dans le pool avec sa nouvelle date de disponibilité
-        theelfpool.add_elf(self)
 
     def set_next_available_working_time(self, thetimestamp):
         """Mets à jour manuellement le working time"""
