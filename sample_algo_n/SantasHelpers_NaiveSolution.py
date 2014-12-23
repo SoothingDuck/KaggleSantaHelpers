@@ -438,14 +438,21 @@ def solution_smallBigQueueElf(toy_file, soln_file, myelves):
 
 if __name__ == '__main__':
 
+    def usage():
+        print "python SantasHelpers_NaiveSolution.py NUM_ELVES NUM_TOYS"
+
+    if len(sys.argv[1:]) != 2:
+        usage()
+        sys.exit(1)
+
     start = time.time()
 
-    NUM_ELVES = 900
-    NUM_TOYS = 100000
+    NUM_ELVES = int(sys.argv[1])
+    NUM_TOYS = int(sys.argv[2])
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
     #soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavail_%d.csv' % NUM_TOYS)
-    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavailifproductive_%d.csv' % NUM_TOYS)
+    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'original_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
     #soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_bigqueue_%d.csv' % NUM_TOYS)
 
     myelves = create_elves(NUM_ELVES)

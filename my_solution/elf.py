@@ -41,7 +41,7 @@ class Elf:
 
         # Mise à jour next available time
         start_available_working_time = self.get_next_available_working_time()
-        start_minute = int(((start_available_working_time-self.__time_base).seconds)/60)
+        start_minute = int(((start_available_working_time-self.__time_base).total_seconds())/60)
         toy_duration = toy.get_duration()
         toy_required_minutes = int(math.ceil(toy_duration / self.rating))
 
@@ -115,7 +115,7 @@ class Elf:
     def set_next_available_working_time(self, thetimestamp):
         """Mets à jour manuellement le working time"""
         self.next_available_working_time = thetimestamp
-        self.next_available_time = int(((thetimestamp-self.__time_base).seconds)/60)
+        self.next_available_time = int(((thetimestamp-self.__time_base).total_seconds())/60)
 
     def get_next_available_working_time(self):
         """Recupere le prochain timestamp de disponibilite de l'elfe"""
