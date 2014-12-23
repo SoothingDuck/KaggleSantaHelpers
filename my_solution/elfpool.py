@@ -23,14 +23,6 @@ class ElfPool:
         """Taille du pool"""
         return len(self.__heap_elf)
 
-    def empty_for_date(self, thedate):
-        """Valide si des elfes sont disponibles pour une date donnée"""
-        for pool_date in self.__hash_elf.keys():
-            if pool_date <= thedate:
-                return False
-
-        return True
-
     def add_elf(self, elf):
         """Ajoute un nouvel elfe dans le pool"""
         # Recupere le timestamp de disponibilité de l'elfe
@@ -39,21 +31,10 @@ class ElfPool:
         # Ajoute dans le heap
         heapq.heappush(self.__heap_elf, (next_available_working_time, elf))
 
-        # Ajoute dans le hash 
-        working_date = next_available_working_time.date()
-        if not self.__hash_elf.has_key(working_date):
-            self.__hash_elf[working_date] = []
-
-        self.__hash_elf[working_date].append(elf)
-
     def next_available_elf(self):
         """Retourne le premier elfe disponible"""
         # Retire de la heap
         next_timestamp, elf = heapq.heappop(self.__heap_elf)
-
-        # Retire du hash
-        next_date = next_timestamp.date()
-        self.__hash_elf[next_date].pop(self.__hash_elf[next_date].index(elf))
 
         # Retourne l'elfe
         return elf
@@ -75,11 +56,31 @@ class ElfPoolTest(unittest.TestCase):
 
         self.assertEquals(len(self.init_pool), 900)
 
-    def test_empty_for_working_date(self):
-        # Y-a-t-il des elfes ou non disponibles avant cette date
-        self.assertTrue(self.pool.empty_for_date(datetime.date(2014, 1, 1)))
-        self.assertFalse(self.pool.empty_for_date(datetime.date(2014, 1, 2)))
-        self.assertFalse(self.pool.empty_for_date(datetime.date(2014, 1, 3)))
+    def test_in_out(self):
+
+        elf1 = Elf(1, datetime.datetime(2014, 1, 1, 10, 0))
+        elf2 = Elf(2, datetime.datetime(2014, 1, 1, 9, 0))
+
+        elfpool = ElfPool()
+        self.assertEquals(len(elfpool), 0)
+
+        elfpool.add_elf(elf1)
+        elfpool.add_elf(elf2)
+
+        elf = elfpool.next_available_elf()
+        self.assertEquals(len(elfpool), 1)
+        self.assertEquals(elf, elf2)
+
+        elf.set_next_available_working_time(datetime.datetime(2014, 1, 1, 11, 0))
+
+        elfpool.add_elf(elf)
+
+        self.assertEquals(len(elfpool), 2)
+
+        self.assertEquals(elfpool.next_available_elf(), elf1)
+        self.assertEquals(elfpool.next_available_elf(), elf2)
+
+
 
     def test_next_available_elf(self):
         self.assertEquals(len(self.pool), 2)
