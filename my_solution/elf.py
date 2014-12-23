@@ -40,8 +40,8 @@ class Elf:
         """Fait un jouet"""
 
         # Mise à jour next available time
-        current_available_working_time = self.get_next_available_working_time()
-        start_minute = int(((current_available_working_time-self.__time_base).seconds)/60)
+        start_available_working_time = self.get_next_available_working_time()
+        start_minute = int(((start_available_working_time-self.__time_base).seconds)/60)
         toy_duration = toy.get_duration()
         toy_required_minutes = int(math.ceil(toy_duration / self.rating))
 
@@ -54,13 +54,13 @@ class Elf:
         if unsanctioned == 0:
             if self.hrs.is_sanctioned_time(end_minute):
                 #self.next_available_time = end_minute
-                self.set_next_available_working_time(current_available_working_time+datetime.timedelta(minutes=end_minute-start_minute))
+                self.set_next_available_working_time(start_available_working_time+datetime.timedelta(minutes=end_minute-start_minute))
             else:
                 #self.next_available_time = self.hrs.next_sanctioned_minute(end_minute)
-                self.set_next_available_working_time(current_available_working_time+datetime.timedelta(minutes=self.hrs.next_sanctioned_minute(end_minute)-start_minute))
+                self.set_next_available_working_time(start_available_working_time+datetime.timedelta(minutes=self.hrs.next_sanctioned_minute(end_minute)-start_minute))
         else:
             #self.next_available_time = self.hrs.apply_resting_period(end_minute, unsanctioned)
-            self.set_next_available_working_time(current_available_working_time+datetime.timedelta(minutes=self.hrs.apply_resting_period(end_minute, unsanctioned)-start_minute))
+            self.set_next_available_working_time(start_available_working_time+datetime.timedelta(minutes=self.hrs.apply_resting_period(end_minute, unsanctioned)-start_minute))
 
         # Mise à jour productivité
         self.rating = max(0.25,
@@ -69,7 +69,7 @@ class Elf:
 
         # Ecriture du jouet
         # print(toy)
-        tt = datetime.datetime(2014, 1, 1, 0, 0) + datetime.timedelta(seconds=60*start_minute)
+        tt = start_available_working_time
         # print "tt : %s" % tt
         time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
         wcsv.writerow([toy.id, self.id, time_string, toy_required_minutes])
@@ -99,6 +99,10 @@ class Elf:
         else:
         # Cas 2 : L'elfe ne dispose d'assez de temps pour réaliser le jouet dans la journée
             while True:
+                if not thetoypool.toy_left_for_elf(self):
+                    self.make_toy(toy, wcsv)
+                    break
+
                 short_toy = thetoypool.get_next_short_toy_for(self)
 
                 if self.will_finish_toy_in_sanctionned_hours(short_toy):
@@ -255,6 +259,7 @@ class ElfTest(unittest.TestCase):
 
         elf.tick_to_next_minute()
         self.assertEquals(elf.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 1))
+
 
 if __name__ == '__main__':
     unittest.main()

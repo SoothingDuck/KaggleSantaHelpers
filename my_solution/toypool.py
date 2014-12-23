@@ -14,6 +14,18 @@ from elf import Elf
 class ToyPool:
     """List of Toys to make"""
 
+    def toy_exists_in_pool(self, toy):
+        """Test l'existence du jouet dans la file"""
+        return self.__hash_existence_by_id.has_key(toy.id)
+ 
+    def get_hash_count(self):
+        """Retourne le hash count"""
+        return self.__hash_count
+
+    def get_hash_existence_by_id(self):
+        """Retourne le hash d'existence"""
+        return self.__hash_existence_by_id
+
     def __init__(self):
 
         # List of known timestamp

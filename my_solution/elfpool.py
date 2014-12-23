@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import csv
 import unittest
 import heapq
 import datetime
 from elf import Elf
+from toy import Toy
+from toypool import ToyPool
 
 class ElfPool:
 
@@ -89,6 +92,138 @@ class ElfPoolTest(unittest.TestCase):
         self.assertEquals(next_available_elf, self.elf1)
         self.assertEquals(len(self.pool), 1)
 
+    def test_apply_strategy_for_1(self):
+        # CSV
+        w = open("test_apply_strategy_for_1.csv", 'wb')
+        wcsv = csv.writer(w)
+        wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
+
+        # ElfPool
+        elfpool = ElfPool()
+        elf1 = Elf(1, datetime.datetime(2014, 1, 1, 9, 0, 0))
+        elf2 = Elf(2, datetime.datetime(2014, 1, 1, 9, 5, 0))
+
+        elfpool.add_elf(elf1)
+        elfpool.add_elf(elf2)
+
+        # ToyPool
+        toypool = ToyPool()
+        toy1 = Toy(1, "2014 1 1 8 0", 10)
+        toy2 = Toy(2, "2014 1 1 10 0", 10)
+
+        toypool.append(toy1)
+        toypool.append(toy2)
+
+        # Strategy
+        elf = elfpool.next_available_elf()
+        elf.apply_strategy_for(toypool, elfpool, wcsv)
+        elfpool.add_elf(elf)
+
+        # Tests
+        e2 = elfpool.next_available_elf()
+        e1 = elfpool.next_available_elf()
+
+        self.assertEquals(e1, elf1)
+        self.assertEquals(e2, elf2)
+
+        self.assertEquals(e1.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 9, 10))
+        self.assertEquals(e2.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 9, 5))
+
+        self.assertEquals(len(toypool), 1)
+
+        self.assertTrue(datetime.datetime(2014, 1, 1, 10, 0) in toypool.get_known_timestamp_list())
+        self.assertTrue(toypool.get_hash_count().has_key(datetime.datetime(2014, 1, 1, 10, 0)))
+
+        self.assertTrue(toypool.toy_exists_in_pool(toy2))
+
+    def test_apply_strategy_for_2(self):
+        # CSV
+        w = open("test_apply_strategy_for_2.csv", 'wb')
+        wcsv = csv.writer(w)
+        wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
+
+        # ElfPool
+        elfpool = ElfPool()
+        elf1 = Elf(1, datetime.datetime(2014, 1, 1, 9, 0, 0))
+        elf2 = Elf(2, datetime.datetime(2014, 1, 1, 9, 5, 0))
+
+        elfpool.add_elf(elf1)
+        elfpool.add_elf(elf2)
+
+        # ToyPool
+        toypool = ToyPool()
+        toy1 = Toy(1, "2014 1 1 8 0", 900)
+        toy2 = Toy(2, "2014 1 1 10 0", 10)
+
+        toypool.append(toy1)
+        toypool.append(toy2)
+
+        print toy1
+        print toy2
+
+        # Strategy
+        elf = elfpool.next_available_elf()
+        elf.apply_strategy_for(toypool, elfpool, wcsv)
+        elfpool.add_elf(elf)
+
+        # Tests
+        e2 = elfpool.next_available_elf()
+        e1 = elfpool.next_available_elf()
+
+        print e1
+        print e2
+
+        print elf1
+        print elf2
+
+        self.assertEquals(e1, elf1)
+        self.assertEquals(e2, elf2)
+
+        self.assertEquals(e1.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 14, 0))
+        self.assertEquals(e2.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 9, 5))
+
+        self.assertEquals(len(toypool), 1)
+
+        self.assertTrue(datetime.datetime(2014, 1, 1, 10, 0) in toypool.get_known_timestamp_list())
+        self.assertTrue(toypool.get_hash_count().has_key(datetime.datetime(2014, 1, 1, 10, 0)))
+
+        self.assertTrue(toypool.toy_exists_in_pool(toy2))
+
+    def test_apply_strategy_for_3(self):
+        # CSV
+        w = open("test_apply_strategy_for_3.csv", 'wb')
+        wcsv = csv.writer(w)
+        wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
+
+        # ElfPool
+        elfpool = ElfPool()
+        elf1 = Elf(1, datetime.datetime(2014, 1, 1, 9, 0, 0))
+
+        elfpool.add_elf(elf1)
+
+        # ToyPool
+        toypool = ToyPool()
+        toy1 = Toy(1, "2014 1 1 8 0", 900)
+        toy2 = Toy(2, "2014 1 1 10 0", 10)
+
+        toypool.append(toy1)
+        toypool.append(toy2)
+
+        # Strategy
+        elf = elfpool.next_available_elf()
+        elf.apply_strategy_for(toypool, elfpool, wcsv)
+        elfpool.add_elf(elf)
+
+        elf = elfpool.next_available_elf()
+        elf.apply_strategy_for(toypool, elfpool, wcsv)
+        elfpool.add_elf(elf)
+
+        # Tests
+        e = elfpool.next_available_elf()
+
+        self.assertEquals(e.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 14, 14))
+
+        self.assertEquals(len(toypool), 0)
 
 if __name__ == '__main__':
     unittest.main()

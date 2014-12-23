@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     NUM_ELVES = 900
     #NUM_TOYS = 10000000
-    NUM_TOYS = 10000
+    NUM_TOYS = 100000
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
     soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))

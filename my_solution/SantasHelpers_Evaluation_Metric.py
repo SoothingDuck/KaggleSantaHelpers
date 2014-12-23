@@ -132,7 +132,7 @@ if __name__ == '__main__':
     start = time.time()
 
     NUM_TOYS = 10000000
-    NUM_TOYS = 10000
+    NUM_TOYS = 100000
     NUM_ELVES = 900
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
