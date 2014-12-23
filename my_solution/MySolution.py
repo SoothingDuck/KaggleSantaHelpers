@@ -8,20 +8,26 @@ import datetime
 import time
 import os
 import csv
-
+import sys
 # ======================================================================= #
 # === MAIN === #
 
 if __name__ == '__main__':
+
+    def usage():
+        print "python MySolution.py NUM_ELVES NUM_TOYS"
+
+    if len(sys.argv[1:]) != 2:
+        usage()
+        sys.exit(1)
 
     start = time.time()
 
     # Définition de quelques variables
     working_date = datetime.date(2014, 1, 1)
 
-    NUM_ELVES = 900
-    #NUM_TOYS = 10000000
-    NUM_TOYS = 100000
+    NUM_ELVES = int(sys.argv[1])
+    NUM_TOYS = int(sys.argv[2])
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
     soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
