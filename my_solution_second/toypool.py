@@ -18,9 +18,29 @@ class ToyPool:
         """Mets à jour l'available list avec les jouets disponibles"""
         elf_list = []
 
-        elf = elfpool.next_available_elf()
-        elf_list.append(elf)
+        # Determine le timestamp de l'elfe à considérer
+        toy = self.pop_toy_of_waiting_list()
+        toy_timestamp = toy.get_min_possible_working_start_time()
+        while True:
+            elf = elfpool.next_available_elf()
+            elf_list.append(elf)
 
+            elf_timestamp = elf.get_next_available_working_time()
+
+            if toy_timestamp <= elf_timestamp:
+                break
+
+            if len(elfpool) == 0:
+                for elf in elf_list:
+                    elfpool.add_elf(elf)
+                return None
+
+        for elf in elf_list:
+            elfpool.add_elf(elf)
+
+        self.push_toy_in_waiting_list(toy)
+
+        # Rempli l'available list
         while True:
             toy = self.pop_toy_of_waiting_list()
             toy_timestamp = toy.get_min_possible_working_start_time()
@@ -29,6 +49,19 @@ class ToyPool:
             else:
                 self.push_toy_in_waiting_list(toy)
                 break
+
+            if self.length_waiting_list() == 0:
+                break
+
+    def push_toy_in_available_list(self, toy):
+        """Rend un jouet disponible"""
+        r = random.random()
+        heapq.heappush(self.__available_list, (r, toy))
+
+    def pop_toy_of_available_list(self):
+        """Retourne un jouet au hasard de l'available list"""
+        r, toy = heapq.heappop(self.__available_list)
+        return toy
 
     def pop_toy_of_waiting_list(self):
         """Retourne le prochain jouet de la waiting list"""
