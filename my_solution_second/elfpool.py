@@ -238,8 +238,8 @@ class ElfPoolTest(unittest.TestCase):
         toy1 = Toy(1, "2014 1 1 8 5", 600)
         toy2 = Toy(2, "2014 1 1 9 6", 60)
 
-        toypool.append(toy1)
-        toypool.append(toy2)
+        toypool.push_toy_in_waiting_list(toy1)
+        toypool.push_toy_in_waiting_list(toy2)
 
         self.assertEquals(toypool.length_waiting_list(), 2)
         self.assertEquals(toypool.length_available_list(), 0)

@@ -18,15 +18,22 @@ class ToyPool:
         """Mets à jour l'available list avec les jouets disponibles"""
         elf_list = []
 
-        while len(elfpool) > 0:
-            elf = elfpool.next_available_elf()
-            elf_list.append(elf)
+        elf = elfpool.next_available_elf()
+        elf_list.append(elf)
 
-            toy_timestamp, toy = self.pop_next_waiting_list_toy()
+        while True:
+            toy = self.pop_toy_of_waiting_list()
+            toy_timestamp = toy.get_min_possible_working_start_time()
             if toy_timestamp <= elf_timestamp:
-                heapq.heappush(self.__available_list, (toy_timestamp, toy))
+                self.push_toy_in_available_list(toy)
             else:
-                raise
+                self.push_toy_in_waiting_list(toy)
+                break
+
+    def pop_toy_of_waiting_list(self):
+        """Retourne le prochain jouet de la waiting list"""
+        toy_timestamp, toy = heapq.heappop(self.__waiting_list)
+        return toy
 
     def toy_exists_in_pool(self, toy):
         """Test l'existence du jouet dans la file"""
@@ -156,7 +163,7 @@ class ToyPool:
         r = random.random()
         heapq.heappush(self.__hash_random_heap_by_timestamp[toy_timestamp], (r, toy))
 
-    def append(self, toy):
+    def push_toy_in_waiting_list(self, toy):
         """Ajoute un jouet dans la liste"""
         # Regarde le timestamp minimum à partir duquel un elfe pourrait travailler sur le jouet
         toy_timestamp = toy.get_min_possible_working_start_time()
