@@ -57,6 +57,7 @@ if __name__ == '__main__':
             print("TOYPOOL LEN : %d, ELFPOOL LEN : %d" % (len(mytoypool), len(myelfpool)))
 
         elf = myelfpool.next_available_elf()
+	# TODO Strategy with random for long objects
         elf.apply_strategy_for(mytoypool, myelfpool, wcsv)
         myelfpool.add_elf(elf)
 

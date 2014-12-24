@@ -31,6 +31,7 @@ if __name__ == '__main__':
     fcsv = csv.reader(open(sub_file, "rb"))
     fcsv.next()
 
+    last_row = None
     last_toy_timestamp = None
     hash_elves = {}
 
@@ -48,9 +49,11 @@ if __name__ == '__main__':
         current_toy_timestamp = elf_timestamp + datetime.timedelta(minutes=duration)
         if last_toy_timestamp is None:
             last_toy_timestamp = current_toy_timestamp
+	    last_row = row
 
         if current_toy_timestamp > last_toy_timestamp:
             last_toy_timestamp = current_toy_timestamp
+	    last_row = row
 
         if i % 1000 == 0:
             print "%d lignes traitées" % i
@@ -60,6 +63,7 @@ if __name__ == '__main__':
     score = last_minute * math.log(1.0 + nb_elves)
     
     print last_toy_timestamp
+    print last_row
     print last_minute
     print '  Score = {0}'.format(score)
     print 'total time = {0}'.format(time.time() - start)
