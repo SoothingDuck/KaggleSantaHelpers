@@ -225,5 +225,56 @@ class ElfPoolTest(unittest.TestCase):
 
         self.assertEquals(len(toypool), 0)
 
+    def test_available_list(self):
+
+        elfpool = ElfPool()
+        elf1 = Elf(1, datetime.datetime(2014, 1, 1, 9, 0))
+        elf2 = Elf(2, datetime.datetime(2014, 1, 1, 10, 0))
+        elfpool.add_elf(elf1)
+        elfpool.add_elf(elf2)
+
+        toypool = ToyPool()
+
+        toy1 = Toy(1, "2014 1 1 8 5", 600)
+        toy2 = Toy(2, "2014 1 1 9 6", 60)
+
+        toypool.append(toy1)
+        toypool.append(toy2)
+
+        self.assertEquals(toypool.length_waiting_list(), 2)
+        self.assertEquals(toypool.length_available_list(), 0)
+
+        toypool.fill_available_list_according_to(elfpool)
+
+        self.assertEquals(toypool.length_waiting_list(), 1)
+        self.assertEquals(toypool.length_available_list(), 1)
+
+        toy = toypool.pop_next_available_toy()
+
+        self.assertEquals(toy, toy1)
+
+        self.assertEquals(toypool.length_waiting_list(), 1)
+        self.assertEquals(toypool.length_available_list(), 0)
+
+        toypool.push_in_available_list_toy(toy)
+
+        self.assertEquals(toypool.length_waiting_list(), 1)
+        self.assertEquals(toypool.length_available_list(), 1)
+
+        toy = toypool.pop_next_available_toy()
+
+        self.assertEquals(toypool.length_waiting_list(), 1)
+        self.assertEquals(toypool.length_available_list(), 0)
+
+        toypool.fill_available_list_according_to(elfpool)
+
+        self.assertEquals(toypool.length_waiting_list(), 0)
+        self.assertEquals(toypool.length_available_list(), 1)
+
+        toy = toypool.pop_next_available_toy()
+
+        self.assertEquals(toy, toy2)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -14,6 +14,20 @@ from elf import Elf
 class ToyPool:
     """List of Toys to make"""
 
+    def fill_available_list_according_to(self, elfpool):
+        """Mets à jour l'available list avec les jouets disponibles"""
+        elf_list = []
+
+        while len(elfpool) > 0:
+            elf = elfpool.next_available_elf()
+            elf_list.append(elf)
+
+            toy_timestamp, toy = self.pop_next_waiting_list_toy()
+            if toy_timestamp <= elf_timestamp:
+                heapq.heappush(self.__available_list, (toy_timestamp, toy))
+            else:
+                raise
+
     def toy_exists_in_pool(self, toy):
         """Test l'existence du jouet dans la file"""
         return self.__hash_existence_by_id.has_key(toy.id)
@@ -28,23 +42,11 @@ class ToyPool:
 
     def __init__(self):
 
-        # List of known timestamp
-        self.__known_timestamp_list = []
+        # waiting list
+        self.__waiting_list = []
 
-        # Hash timestamp count
-        self.__hash_count = {}
-
-        # Random heap by timestamp
-        self.__hash_random_heap_by_timestamp = {}
-
-        # Duration heap by timestamp
-        self.__hash_duration_heap_by_timestamp = {}
-
-        # Existence Hash by toy id
-        self.__hash_existence_by_id = {}
-
-        # Nb of toys
-        self.__toy_counter = 0
+        # available list
+        self.__available_list = []
 
     def __len__(self):
         """Retourne la taille du toy pool"""
@@ -54,49 +56,6 @@ class ToyPool:
         """Il reste des jouets pour l'elfe"""
         next_working_time = elf.get_next_available_working_time()
         return (next_working_time >= self.__known_timestamp_list[0])
-
-    def get_next_short_toy_for(self, elf):
-        """Retourne un jouet au hasard disponible pour l'elf"""
-        # Loop tant qu'on n'a rien de disponible
-        while not self.toy_left_for_elf(elf):
-            elf.tick_to_next_minute()
-
-        # Timestamp de l'elfe
-        elf_timestamp = elf.get_next_available_working_time()
-
-        # Indice max de la liste des timestamp
-        imax = bisect.bisect_right(self.__known_timestamp_list, elf_timestamp)
-
-        # Indice au hasard
-        i = random.randint(0, imax-1)
-
-        # Recuperation du timestamp
-        toy_timestamp = self.__known_timestamp_list[i]
-
-        # Recuperation du jouet dans la random heap
-        while True:
-            d, toy = heapq.heappop(self.__hash_duration_heap_by_timestamp[toy_timestamp])
-            if self.__hash_existence_by_id.has_key(toy.id):
-                break
-
-        # Suppression de l'existence hash
-        del self.__hash_existence_by_id[toy.id]
-
-        # Decrement counter
-        self.__hash_count[toy_timestamp] -= 1
-
-        # Mise à zero des élements
-        if self.__hash_count[toy_timestamp] == 0:
-            del self.__hash_count[toy_timestamp]
-            del self.__hash_random_heap_by_timestamp[toy_timestamp]
-            del self.__hash_duration_heap_by_timestamp[toy_timestamp]
-            del self.__known_timestamp_list[i]
-
-        # Mise à jour du compteur
-        self.__toy_counter -= 1
-
-        # On retourne le jouet
-        return toy
 
     def get_random_toy_for_elf(self, elf):
         """Retourne un jouet au hasard disponible pour l'elf"""
@@ -201,26 +160,17 @@ class ToyPool:
         """Ajoute un jouet dans la liste"""
         # Regarde le timestamp minimum à partir duquel un elfe pourrait travailler sur le jouet
         toy_timestamp = toy.get_min_possible_working_start_time()
-        toy_id = toy.id
 
-        # Met à jour la liste des known timestamp si necessaire
-        self.append_known_timestamp_list_with_toy_timestamp(toy_timestamp)
+        # Mets à jour la waiting list
+        heapq.heappush(self.__waiting_list, (toy_timestamp, toy))
 
-        # Met à jour le hash random avec la queue correspondante
-        self.append_hash_random_heap_by_timestamp(toy)
+    def length_available_list(self):
+        """Retourne la taille de la waiting list"""
+        return len(self.__available_list)
 
-        # Met à jour le hash duration avec la queue correspondante
-        self.append_hash_duration_heap_by_timestamp(toy)
-
-        # Met à jour le hash existence
-        self.__hash_existence_by_id[toy.id] = 1
-
-        # Met à jour le hash compteur
-        self.append_hash_count_by_timestamp(toy)
-
-        # Met à jour le toy counter
-        self.__toy_counter += 1
-
+    def length_waiting_list(self):
+        """Retourne la taille de la waiting list"""
+        return len(self.__waiting_list)
 
     def add_file_content(self, toy_file, num_toys=None):
         """Ajout de jouets Ã  partir d'un fichier"""
@@ -242,6 +192,9 @@ class ToyPool:
             print '\n ** Read a file with {0} toys, expected {1} toys. Exiting.'.format(len(self), num_toys)
             exit(-1)
 
+
+from elfpool import ElfPool
+
 class ToyPoolTest(unittest.TestCase):
 
     def setUp(self):
@@ -259,6 +212,7 @@ class ToyPoolTest(unittest.TestCase):
         self.toy_small_pool.append(self.toy2)
         self.toy_small_pool.append(self.toy3)
 
+
     def test_toy_left_for_elf(self):
 
         elf = Elf(1, datetime.datetime(2014, 1, 1, 9, 5, 0))
@@ -272,28 +226,6 @@ class ToyPoolTest(unittest.TestCase):
         pool.append(toy2)
 
         self.assertTrue(pool.toy_left_for_elf(elf))
-
-
-    def test_get_next_short_toy_for(self):
-
-        elf = Elf(1, datetime.datetime(2014, 1, 1, 9, 11, 0))
-
-        pool = ToyPool()
-
-        toy1 = Toy(1, "2014 1 1 9 5 0", 1)
-        toy2 = Toy(2, "2014 1 1 9 5 0", 2)
-        toy3 = Toy(3, "2014 1 1 9 5 0", 10)
-        toy4 = Toy(4, "2014 1 1 9 10 0", 10)
-
-        pool.append(toy1)
-        pool.append(toy2)
-        pool.append(toy3)
-        pool.append(toy4)
-
-        self.assertEquals(pool.get_next_short_toy_for(elf), toy4)
-        self.assertEquals(pool.get_next_short_toy_for(elf), toy1)
-        self.assertEquals(pool.get_next_short_toy_for(elf), toy2)
-        self.assertEquals(pool.get_next_short_toy_for(elf), toy3)
 
     def test_empty(self):
         self.assertTrue(self.toy_empty_pool.empty())
