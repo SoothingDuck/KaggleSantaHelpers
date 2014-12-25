@@ -149,7 +149,15 @@ class ToyPool:
 
     def empty(self):
         """Retourne True si la liste est vide"""
-        return len(self.__known_timestamp_list) == 0
+        return (self.empty_waiting_list() and self.empty_available_list())
+
+    def empty_available_list(self):
+        """Retourne True si la available list est vide"""
+        return len(self.__available_list) == 0
+
+    def empty_waiting_list(self):
+        """Retourne True si la waiting list est vide"""
+        return len(self.__waiting_list) == 0
     
     def get_known_timestamp_list(self):
         """Retourne la liste des timestamp contenant des objets"""
@@ -221,19 +229,18 @@ class ToyPool:
             for row in fcsv:
                 i += 1
                 new_toy = Toy(row[0], row[1], row[2])
-                self.append(new_toy)
-                if len(self) % 1000 == 0:
-                    print len(self)
+                self.push_toy_in_waiting_list(new_toy)
+
+                if self.length_waiting_list() % 1000 == 0:
+                    print self.length_waiting_list()
 
                 if num_toys is not None and i >= num_toys:
                     break
 
-        if num_toys is not None and len(self) != num_toys:
-            print '\n ** Read a file with {0} toys, expected {1} toys. Exiting.'.format(len(self), num_toys)
+        if num_toys is not None and self.length_waiting_list() != num_toys:
+            print '\n ** Read a file with {0} toys, expected {1} toys. Exiting.'.format(self.length_waiting_list(), num_toys)
             exit(-1)
 
-
-from elfpool import ElfPool
 
 class ToyPoolTest(unittest.TestCase):
 
@@ -248,40 +255,14 @@ class ToyPoolTest(unittest.TestCase):
         self.toy1 = Toy(1, "2014 1 1 8 0", 600)
         self.toy2 = Toy(2, "2014 1 1 9 3", 60)
         self.toy3 = Toy(3, "2014 1 1 10 0", 2)
-        self.toy_small_pool.append(self.toy1)
-        self.toy_small_pool.append(self.toy2)
-        self.toy_small_pool.append(self.toy3)
+        self.toy_small_pool.push_toy_in_waiting_list(self.toy1)
+        self.toy_small_pool.push_toy_in_waiting_list(self.toy2)
+        self.toy_small_pool.push_toy_in_waiting_list(self.toy3)
 
-
-    def test_toy_left_for_elf(self):
-
-        elf = Elf(1, datetime.datetime(2014, 1, 1, 9, 5, 0))
-
-        pool = ToyPool()
-
-        toy1 = Toy(1, "2014 1 1 9 5", 600)
-        toy2 = Toy(2, "2014 1 1 9 6", 60)
-
-        pool.append(toy1)
-        pool.append(toy2)
-
-        self.assertTrue(pool.toy_left_for_elf(elf))
 
     def test_empty(self):
         self.assertTrue(self.toy_empty_pool.empty())
 
-
-    def test_get_random_toy_for_elf(self):
-        """Jouet au hasard parmi ceux disponibles"""
-        self.assertEquals(len(self.toy_small_pool), 3)
-
-        # Recupere un jouet au hasard => seul le 1 est disponible
-        random_toy = self.toy_small_pool.get_random_toy_for_elf(self.elf)  
-
-        self.assertTrue(random_toy not in (self.toy2, self.toy3))
-        self.assertEquals(random_toy, self.toy1)
-
-        self.assertEquals(len(self.toy_small_pool), 2)
 
 
 if __name__ == '__main__':
