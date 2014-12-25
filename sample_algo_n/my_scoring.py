@@ -55,13 +55,14 @@ if __name__ == '__main__':
             last_toy_timestamp = current_toy_timestamp
 	    last_row = row
 
-        if i % 1000 == 0:
+        if i % 1000000 == 0:
             print "%d lignes traitées" % i
 
     nb_elves = len(hash_elves.keys())
     last_minute = int(((last_toy_timestamp - datetime.datetime(2014, 1, 1, 0, 0)).total_seconds())/60)
     score = last_minute * math.log(1.0 + nb_elves)
     
+    print "Nb Elf : %d, Nb rows : %d" % (nb_elves, i)
     print last_toy_timestamp
     print last_row
     print last_minute
