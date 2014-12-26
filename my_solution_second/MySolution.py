@@ -54,7 +54,7 @@ if __name__ == '__main__':
         #   Si on peut traiter l'objet dans la journée, le faire et mettre à jour la date de disponibilité de l'elfe
         #   Sinon planifier l'objet pour le lendemain matin et le traiter et remplir le reste de la journée avec des objets "courts"
         if mytoypool.length_available_list() % 1000 == 0:
-            print("TOYPOOL LEN : %d, ELFPOOL LEN : %d" % (mytoypool.length_available_list(), len(myelfpool)))
+            print("TOYPOOL LEN : %d, ELFPOOL LEN : %d" % (mytoypool.length_available_list()+mytoypool.length_waiting_list(), len(myelfpool)))
 
         # Etape 1 : Mise à jour de l'available list en rapport avec le elfpool actuel
         mytoypool.fill_available_list_according_to(myelfpool)
@@ -65,18 +65,24 @@ if __name__ == '__main__':
 
         # Etape 3 : Evaluer quel sera l'elfe qui pourra réaliser celui ci le plus tôt
         tmp = []
+        min_future_timestamp = None
+        elf_kept = None
         for elf in myelfpool.elf_list():
             if toy_timestamp <= elf.get_next_available_working_time():
                 elf_future_toy_timestamp = elf.evaluate_finish_time_for(toy)
-                tmp.append((elf_future_toy_timestamp, elf))
-        heapq.heapify(tmp)
-        elf_future_toy_timestamp, elf = heapq.heappop(tmp)
+                if min_future_timestamp is None:
+                    min_future_timestamp = elf_future_toy_timestamp
+                    elf_kept = elf
+
+                if elf_future_toy_timestamp < min_future_timestamp:
+                    min_future_timestamp = elf_future_toy_timestamp
+                    elf_kept = elf
 
         # Etape 4 : L'elfe qui finira le plus tôt fait le jouet
-        elf.make_toy(toy, wcsv)
+        elf_kept.make_toy(toy, wcsv)
 
         # Etape 5 : Reforme le pool d'elfe
-        myelfpool.update_elf(elf)
+        myelfpool.update_elf(elf_kept)
 
         #while len(tmp) > 0:
         #    elf_future_toy_timestamp, elf = heapq.heappop(tmp)
