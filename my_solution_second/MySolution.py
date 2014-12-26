@@ -9,6 +9,7 @@ import time
 import os
 import csv
 import sys
+import heapq
 # ======================================================================= #
 # === MAIN === #
 
@@ -30,7 +31,7 @@ if __name__ == '__main__':
     NUM_TOYS = int(sys.argv[2])
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
-    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
+    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_second_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
 
     # Création du pool d'elfes
     myelfpool = ElfPool()
@@ -53,13 +54,34 @@ if __name__ == '__main__':
         #   1 jouet au hasard parmi ceux disponibles
         #   Si on peut traiter l'objet dans la journée, le faire et mettre à jour la date de disponibilité de l'elfe
         #   Sinon planifier l'objet pour le lendemain matin et le traiter et remplir le reste de la journée avec des objets "courts"
-        if len(mytoypool) % 1000 == 0:
-            print("TOYPOOL LEN : %d, ELFPOOL LEN : %d" % (len(mytoypool), len(myelfpool)))
+        if mytoypool.length_available_list() % 1000 == 0:
+            print("TOYPOOL LEN : %d, ELFPOOL LEN : %d" % (mytoypool.length_available_list(), len(myelfpool)))
 
-        elf = myelfpool.next_available_elf()
-	# TODO Strategy with random for long objects
-        elf.apply_strategy_for(mytoypool, myelfpool, wcsv)
-        myelfpool.add_elf(elf)
+        # Etape 1 : Mise à jour de l'available list en rapport avec le elfpool actuel
+        mytoypool.fill_available_list_according_to(myelfpool)
+
+        # Etape 2 : Recuperer un jouet de l'available list
+        toy = mytoypool.pop_toy_of_available_list()
+
+        # Etape 3 : Evaluer quel sera l'elfe qui pourra réaliser celui ci le plus tôt
+        tmp = []
+        for elf_current_timestamp, elf in myelfpool.elf_list():
+            elf_future_toy_timestamp = elf.evaluate_finish_time_for(toy)
+            tmp.append((elf_future_toy_timestamp, elf))
+        heapq.heapify(tmp)
+        elf_future_toy_timestamp, elf = heapq.heappop(tmp)
+
+        # Etape 4 : L'elfe qui finira le plus tôt fait le jouet
+        elf.make_toy(toy, wcsv)
+        heapq.heappush(tmp, (elf_future_toy_timestamp, elf))
+        myelfpool.reset_pool_with(tmp)
+
+        #while len(tmp) > 0:
+        #    elf_future_toy_timestamp, elf = heapq.heappop(tmp)
+        #    myelfpool.add_elf(elf)
+            
+        # On continue
+
 
 
     print 'total runtime = {0}'.format(time.time() - start)

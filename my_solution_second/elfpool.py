@@ -42,6 +42,14 @@ class ElfPool:
         # Retourne l'elfe
         return elf
 
+    def reset_pool_with(self, tmp):
+        """Initialise un pool avec une liste"""
+        # Efface la heap
+        self.__heap_elf = tmp
+
+    def elf_list(self):
+        """Retourne elflist"""
+        return self.__heap_elf
 
 class ElfPoolTest(unittest.TestCase):
 

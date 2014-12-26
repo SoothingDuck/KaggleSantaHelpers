@@ -36,6 +36,32 @@ class Elf:
         else:
             self.next_available_working_time = available_time + datetime.timedelta(minutes=1)
 
+    def evaluate_finish_time_for(self, toy):
+        """Evalue le timestamp de fin de création d'un jouet"""
+        # Mise à jour next available time
+        start_available_working_time = self.get_next_available_working_time()
+        start_minute = int(((start_available_working_time-self.__time_base).total_seconds())/60)
+        toy_duration = toy.get_duration()
+        toy_required_minutes = int(math.ceil(toy_duration / self.rating))
+
+        sanctioned, unsanctioned = self.hrs.get_sanctioned_breakdown(start_minute, toy_required_minutes)
+
+        # enforce resting time based on the end_minute and the unsanctioned minutes that
+        # need to be accounted for.
+        end_minute = start_minute + toy_required_minutes
+        # print(start_minute, end_minute)
+        if unsanctioned == 0:
+            if self.hrs.is_sanctioned_time(end_minute):
+                #self.next_available_time = end_minute
+                return start_available_working_time+datetime.timedelta(minutes=end_minute-start_minute)
+            else:
+                #self.next_available_time = self.hrs.next_sanctioned_minute(end_minute)
+                return start_available_working_time+datetime.timedelta(minutes=self.hrs.next_sanctioned_minute(end_minute)-start_minute)
+        else:
+            #self.next_available_time = self.hrs.apply_resting_period(end_minute, unsanctioned)
+            return start_available_working_time+datetime.timedelta(minutes=self.hrs.apply_resting_period(end_minute, unsanctioned)-start_minute)
+
+
     def make_toy(self, toy, wcsv):
         """Fait un jouet"""
 

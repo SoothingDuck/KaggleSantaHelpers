@@ -18,6 +18,10 @@ class ToyPool:
         """Mets à jour l'available list avec les jouets disponibles"""
         elf_list = []
 
+        # Si rien dans la waiting list on sort
+        if self.length_waiting_list() == 0:
+            return
+
         # Determine le timestamp de l'elfe à considérer
         toy = self.pop_toy_of_waiting_list()
         toy_timestamp = toy.get_min_possible_working_start_time()
