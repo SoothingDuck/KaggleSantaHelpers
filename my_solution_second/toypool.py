@@ -18,46 +18,57 @@ class ToyPool:
         """Mets à jour l'available list avec les jouets disponibles"""
         elf_list = []
 
+        # Cas 1 : rien dans la waiting list => on sort
         # Si rien dans la waiting list on sort
         if self.length_waiting_list() == 0:
             return
 
-        raise "A modifier"
+        # Cas 2 : Il y a quelque chose dans l'available list => on sort
+        if self.length_available_list() > 0:
+            return
 
-        # Determine le timestamp de l'elfe à considérer
-        toy = self.pop_toy_of_waiting_list()
-        toy_timestamp = toy.get_min_possible_working_start_time()
+        # Cas 3 : Rien dans l'available list et du monde dans la waiting list, plusieurs sous-cas
+        # Cas 3.1 : on recupere le timestamp min dans l'elf pool et on recupere les jouets
+        min_next_available_working_time = elfpool.min_next_available_working_time_among_elves()
+
+        # Rempli la available list
         while True:
-            elf = elfpool.next_available_elf()
-            elf_list.append(elf)
-
-            elf_timestamp = elf.get_next_available_working_time()
-
-            if toy_timestamp <= elf_timestamp:
+            # Rien dans la waiting list => on sort
+            if self.length_waiting_list() == 0:
                 break
 
-            if len(elfpool) == 0:
-                for elf in elf_list:
-                    elfpool.add_elf(elf)
-                return None
-
-        for elf in elf_list:
-            elfpool.add_elf(elf)
-
-        self.push_toy_in_waiting_list(toy)
-
-        # Rempli l'available list
-        while True:
+            # Quelque chose, on met dans l'available list
             toy = self.pop_toy_of_waiting_list()
             toy_timestamp = toy.get_min_possible_working_start_time()
-            if toy_timestamp <= elf_timestamp:
+
+            if toy_timestamp <= min_next_available_working_time:
                 self.push_toy_in_available_list(toy)
             else:
                 self.push_toy_in_waiting_list(toy)
                 break
 
-            if self.length_waiting_list() == 0:
-                break
+        # Cas 3.2 : la available list n'est pas vide => On sort
+        if self.length_available_list() > 0:
+            return
+        else:
+        # Cas 3.3 : on se base sur le temps max pour récupérer des objets
+            max_next_available_working_time = elfpool.max_next_available_working_time_among_elves()
+            
+            while True:
+                # Rien dans la waiting list => on sort
+                if self.length_waiting_list() == 0:
+                    break
+
+                # Quelque chose, on met dans l'available list
+                toy = self.pop_toy_of_waiting_list()
+                toy_timestamp = toy.get_min_possible_working_start_time()
+
+                if toy_timestamp <= max_next_available_working_time:
+                    self.push_toy_in_available_list(toy)
+                else:
+                    self.push_toy_in_waiting_list(toy)
+                    break
+                
 
     def push_toy_in_available_list(self, toy):
         """Rend un jouet disponible"""

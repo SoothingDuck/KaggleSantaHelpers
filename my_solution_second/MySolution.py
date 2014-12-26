@@ -65,8 +65,8 @@ if __name__ == '__main__':
 
         # Etape 3 : Evaluer quel sera l'elfe qui pourra réaliser celui ci le plus tôt
         tmp = []
-        for elf_timestamp, elf in myelfpool.elf_list():
-            if toy_timestamp <= elf_timestamp:
+        for elf in myelfpool.elf_list():
+            if toy_timestamp <= elf.get_next_available_working_time():
                 elf_future_toy_timestamp = elf.evaluate_finish_time_for(toy)
                 tmp.append((elf_future_toy_timestamp, elf))
         heapq.heapify(tmp)

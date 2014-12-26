@@ -12,47 +12,34 @@ class ElfPool:
 
     def __init__(self, n):
         # Liste des elfes triés par temps de disponibilité
-        self.__hash_elf = {} # no heap anymore
+        self.__hash_elf = {}
         for i in range(n):
-            self.__hash_elf[i] = None
-            self.update_elf(Elf(i+1))
-
-        # Next available elf Id
-        self.__next_available_elf_id = 1
-
-        # Least available elf Id
-        self.__least_available_elf_id = n
-
-        # Taille du pool
-        self.__pool_len = n
-
-    def next_available_elf(self):
-        """Retourne l'elfe disponible tout de suite"""
-
-    def reset_pool(self):
-        """Remise à zero"""
-        self.__heap_elf = []
+            self.__hash_elf[i+1] = Elf(i+1)
 
     def __len__(self):
         """Taille du pool"""
-        return self.__pool_len
+        return len(self.__hash_elf)
+
+    def all_elves_next_available_working_time(self):
+        """Recupere l'ensemble des next available working time"""
+        return [x.get_next_available_working_time() for x in self.__hash_elf.values()]
+
+    def min_next_available_working_time_among_elves(self):
+        """Retourne le min next available working time"""
+        return min(self.all_elves_next_available_working_time())
+
+    def max_next_available_working_time_among_elves(self):
+        """Retourne le max next available working time"""
+        return max(self.all_elves_next_available_working_time())
 
     def update_elf(self, elf):
         """Mets à jour un elfe dans le pool"""
         # Mets à jour dans le hash
         self.__hash_elf[elf.id] = elf
 
-
-
-    def add_elf_list(self, tmp):
-        """Ajoute une liste d'elfe"""
-        for elf_timestamp, elf in tmp:
-            self.__heap_elf.append((elf_timestamp, elf))
-        heapq.heapify(self.__heap_elf)
-
     def elf_list(self):
-        """Retourne elflist"""
-        return self.__heap_elf
+        """Retourne la liste des elfes"""
+        return self.__hash_elf.values()
 
 class ElfPoolTest(unittest.TestCase):
 
@@ -81,17 +68,13 @@ class ElfPoolTest(unittest.TestCase):
         elfpool.update_elf(elf2)
 
         elf = elfpool.next_available_elf()
-        self.assertEquals(len(elfpool), 1)
         self.assertEquals(elf, elf2)
 
         elf.set_next_available_working_time(datetime.datetime(2014, 1, 1, 11, 0))
 
-        elfpool.add_elf(elf)
-
-        self.assertEquals(len(elfpool), 2)
+        elfpool.update_elf(elf)
 
         self.assertEquals(elfpool.next_available_elf(), elf1)
-        self.assertEquals(elfpool.next_available_elf(), elf2)
 
 
 
