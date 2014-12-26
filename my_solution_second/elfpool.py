@@ -10,37 +10,45 @@ from toypool import ToyPool
 
 class ElfPool:
 
-    def __init__(self):
+    def __init__(self, n):
         # Liste des elfes triés par temps de disponibilité
-        self.__heap_elf = []
-
-        # Hash date Elf
-        self.__hash_elf = {}
-
-    def init_with(self, n):
-        """Initialise le pool avec n elfes"""
+        self.__hash_elf = {} # no heap anymore
         for i in range(n):
-            self.add_elf(Elf(i+1))
+            self.__hash_elf[i] = None
+            self.update_elf(Elf(i+1))
+
+        # Next available elf Id
+        self.__next_available_elf_id = 1
+
+        # Least available elf Id
+        self.__least_available_elf_id = n
+
+        # Taille du pool
+        self.__pool_len = n
+
+    def next_available_elf(self):
+        """Retourne l'elfe disponible tout de suite"""
+
+    def reset_pool(self):
+        """Remise à zero"""
+        self.__heap_elf = []
 
     def __len__(self):
         """Taille du pool"""
-        return len(self.__heap_elf)
+        return self.__pool_len
 
-    def add_elf(self, elf):
-        """Ajoute un nouvel elfe dans le pool"""
-        # Recupere le timestamp de disponibilité de l'elfe
-        next_available_working_time = elf.get_next_available_working_time()
+    def update_elf(self, elf):
+        """Mets à jour un elfe dans le pool"""
+        # Mets à jour dans le hash
+        self.__hash_elf[elf.id] = elf
 
-        # Ajoute dans le heap
-        heapq.heappush(self.__heap_elf, (next_available_working_time, elf))
 
-    def next_available_elf(self):
-        """Retourne le premier elfe disponible"""
-        # Retire de la heap
-        next_timestamp, elf = heapq.heappop(self.__heap_elf)
 
-        # Retourne l'elfe
-        return elf
+    def add_elf_list(self, tmp):
+        """Ajoute une liste d'elfe"""
+        for elf_timestamp, elf in tmp:
+            self.__heap_elf.append((elf_timestamp, elf))
+        heapq.heapify(self.__heap_elf)
 
     def elf_list(self):
         """Retourne elflist"""
@@ -49,16 +57,15 @@ class ElfPool:
 class ElfPoolTest(unittest.TestCase):
 
     def setUp(self):
-        self.pool = ElfPool()
+        self.pool = ElfPool(2)
 
         self.elf1 = Elf(1, datetime.datetime(2014, 1, 2, 9, 0, 0))
         self.elf2 = Elf(2, datetime.datetime(2014, 1, 2, 9, 10, 0))
-        self.pool.add_elf(self.elf1)
-        self.pool.add_elf(self.elf2)
+        self.pool.update_elf(self.elf1)
+        self.pool.update_elf(self.elf2)
 
     def test_init_with(self):
-        self.init_pool = ElfPool()
-        self.init_pool.init_with(900)
+        self.init_pool = ElfPool(900)
 
         self.assertEquals(len(self.init_pool), 900)
 
@@ -67,11 +74,11 @@ class ElfPoolTest(unittest.TestCase):
         elf1 = Elf(1, datetime.datetime(2014, 1, 1, 10, 0))
         elf2 = Elf(2, datetime.datetime(2014, 1, 1, 9, 0))
 
-        elfpool = ElfPool()
-        self.assertEquals(len(elfpool), 0)
+        elfpool = ElfPool(2)
+        self.assertEquals(len(elfpool), 2)
 
-        elfpool.add_elf(elf1)
-        elfpool.add_elf(elf2)
+        elfpool.update_elf(elf1)
+        elfpool.update_elf(elf2)
 
         elf = elfpool.next_available_elf()
         self.assertEquals(len(elfpool), 1)
@@ -230,7 +237,7 @@ class ElfPoolTest(unittest.TestCase):
 
     def test_available_list(self):
 
-        elfpool = ElfPool()
+        elfpool = ElfPool(3)
         elf1 = Elf(1, datetime.datetime(2014, 1, 1, 9, 0))
         elf2 = Elf(2, datetime.datetime(2014, 1, 1, 10, 0))
         elf3 = Elf(3, datetime.datetime(2014, 1, 1, 15, 0))

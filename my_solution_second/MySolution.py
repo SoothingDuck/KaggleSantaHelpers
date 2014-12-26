@@ -34,8 +34,7 @@ if __name__ == '__main__':
     soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_second_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
 
     # Création du pool d'elfes
-    myelfpool = ElfPool()
-    myelfpool.init_with(NUM_ELVES)
+    myelfpool = ElfPool(NUM_ELVES)
 
     # Création du pool de jouets
     mytoypool = ToyPool()
@@ -62,13 +61,14 @@ if __name__ == '__main__':
 
         # Etape 2 : Recuperer un jouet de l'available list
         toy = mytoypool.pop_toy_of_available_list()
+        toy_timestamp = toy.get_min_possible_working_start_time()
 
         # Etape 3 : Evaluer quel sera l'elfe qui pourra réaliser celui ci le plus tôt
         tmp = []
-        while len(myelfpool) > 0:
-            elf = myelfpool.next_available_elf()
-            elf_future_toy_timestamp = elf.evaluate_finish_time_for(toy)
-            tmp.append((elf_future_toy_timestamp, elf))
+        for elf_timestamp, elf in myelfpool.elf_list():
+            if toy_timestamp <= elf_timestamp:
+                elf_future_toy_timestamp = elf.evaluate_finish_time_for(toy)
+                tmp.append((elf_future_toy_timestamp, elf))
         heapq.heapify(tmp)
         elf_future_toy_timestamp, elf = heapq.heappop(tmp)
 
@@ -76,12 +76,7 @@ if __name__ == '__main__':
         elf.make_toy(toy, wcsv)
 
         # Etape 5 : Reforme le pool d'elfe
-        # 1. l'elfe qui a bossé
-        myelfpool.add_elf(elf)
-
-        # 2. Les autres
-        for elf_timestamp, elf in tmp:
-            myelfpool.add_elf(elf)
+        myelfpool.update_elf(elf)
 
         #while len(tmp) > 0:
         #    elf_future_toy_timestamp, elf = heapq.heappop(tmp)

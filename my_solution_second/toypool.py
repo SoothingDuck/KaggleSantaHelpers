@@ -22,6 +22,8 @@ class ToyPool:
         if self.length_waiting_list() == 0:
             return
 
+        raise "A modifier"
+
         # Determine le timestamp de l'elfe à considérer
         toy = self.pop_toy_of_waiting_list()
         toy_timestamp = toy.get_min_possible_working_start_time()
