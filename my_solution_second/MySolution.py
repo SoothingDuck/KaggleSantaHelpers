@@ -65,7 +65,8 @@ if __name__ == '__main__':
 
         # Etape 3 : Evaluer quel sera l'elfe qui pourra réaliser celui ci le plus tôt
         tmp = []
-        for elf_current_timestamp, elf in myelfpool.elf_list():
+        while len(myelfpool) > 0:
+            elf = myelfpool.next_available_elf()
             elf_future_toy_timestamp = elf.evaluate_finish_time_for(toy)
             tmp.append((elf_future_toy_timestamp, elf))
         heapq.heapify(tmp)
@@ -73,8 +74,14 @@ if __name__ == '__main__':
 
         # Etape 4 : L'elfe qui finira le plus tôt fait le jouet
         elf.make_toy(toy, wcsv)
-        heapq.heappush(tmp, (elf_future_toy_timestamp, elf))
-        myelfpool.reset_pool_with(tmp)
+
+        # Etape 5 : Reforme le pool d'elfe
+        # 1. l'elfe qui a bossé
+        myelfpool.add_elf(elf)
+
+        # 2. Les autres
+        for elf_timestamp, elf in tmp:
+            myelfpool.add_elf(elf)
 
         #while len(tmp) > 0:
         #    elf_future_toy_timestamp, elf = heapq.heappop(tmp)
