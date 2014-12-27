@@ -68,15 +68,19 @@ if __name__ == '__main__':
         min_future_timestamp = None
         elf_kept = None
         for elf in myelfpool.elf_list():
-            if toy_timestamp <= elf.get_next_available_working_time():
-                elf_future_toy_timestamp = elf.evaluate_finish_time_for(toy)
-                if min_future_timestamp is None:
-                    min_future_timestamp = elf_future_toy_timestamp
-                    elf_kept = elf
+            # Le jouet est dans le futur, on met à jour le timestamp de l'elfe
+            if elf.get_next_available_working_time() < toy_timestamp:
+                elf.set_next_available_working_time(toy_timestamp)
+                myelfpool.update_elf(elf)
 
-                if elf_future_toy_timestamp < min_future_timestamp:
-                    min_future_timestamp = elf_future_toy_timestamp
-                    elf_kept = elf
+            elf_future_toy_timestamp = elf.evaluate_finish_time_for(toy)
+            if min_future_timestamp is None:
+                min_future_timestamp = elf_future_toy_timestamp
+                elf_kept = elf
+
+            if elf_future_toy_timestamp < min_future_timestamp:
+                min_future_timestamp = elf_future_toy_timestamp
+                elf_kept = elf
 
         # Etape 4 : L'elfe qui finira le plus tôt fait le jouet
         elf_kept.make_toy(toy, wcsv)
