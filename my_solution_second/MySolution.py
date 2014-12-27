@@ -57,10 +57,10 @@ if __name__ == '__main__':
             print("TOYPOOL LEN : %d, ELFPOOL LEN : %d" % (mytoypool.length_available_list()+mytoypool.length_waiting_list(), len(myelfpool)))
 
         # Etape 1 : Mise à jour de l'available list en rapport avec le elfpool actuel
-        mytoypool.fill_available_list_according_to(myelfpool)
+        # mytoypool.fill_available_list_according_to(myelfpool)
 
-        # Etape 2 : Recuperer un jouet de l'available list
-        toy = mytoypool.pop_toy_of_available_list()
+        # Etape 2 : Recuperer un jouet de la waiting list
+        toy = mytoypool.pop_toy_of_waiting_list()
         toy_timestamp = toy.get_min_possible_working_start_time()
 
         # Etape 3 : Evaluer quel sera l'elfe qui pourra réaliser celui ci le plus tôt
