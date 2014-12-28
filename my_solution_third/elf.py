@@ -39,12 +39,27 @@ class Elf:
     def evaluate_finish_time_for(self, toy):
         """Evalue le timestamp de fin de création d'un jouet"""
         # Mise à jour next available time
-        start_available_working_time = self.next_available_time
+        start_available_working_time = self.get_next_available_working_time()
         toy_duration = toy.get_duration()
+        toy_timestamp = toy.get_min_possible_working_start_time()
+
+        start_min = max(start_available_working_time, toy_timestamp)
+
         #toy_required_minutes = int(math.ceil(toy_duration / self.rating))
         toy_required_minutes = int(math.ceil(toy_duration / self.rating))
-        return start_available_working_time + toy_required_minutes
+        return start_min + datetime.timedelta(minutes=toy_required_minutes)
 
+
+    def get_sanctionned_unsactionned(self, toy):
+        """Rapport temps sanctionned/unsanctionned"""
+        start_available_working_time = self.get_next_available_working_time()
+        start_minute = int(((start_available_working_time-self.__time_base).total_seconds())/60)
+        toy_duration = toy.get_duration()
+        toy_required_minutes = int(math.ceil(toy_duration / self.rating))
+
+        sanctioned, unsanctioned = self.hrs.get_sanctioned_breakdown(start_minute, toy_required_minutes)
+
+        return (sanctioned, unsanctioned)
 
     def make_toy(self, toy, wcsv):
         """Fait un jouet"""
