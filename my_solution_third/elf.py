@@ -11,10 +11,9 @@ from toy import Toy
 
 class Elf:
     """ Each Elf starts with a rating of 1.0 and are available at 09:00 on Jan 1.  """
-    def __init__(self, elfid, start_working_time = datetime.datetime(2014,1,1,9,0,0)):
+    def __init__(self, elfid):
         self.id = elfid
         self.rating = 1.0
-        self.next_available_working_time = start_working_time
         self.next_available_time = 540
         self.rating_increase = 1.02
         self.rating_decrease = 0.90
@@ -23,28 +22,18 @@ class Elf:
 
         self.__time_base = datetime.datetime(2014,1,1,0,0,0)
 
+    def get_next_available_time(self):
+        """Recupere le next_available_time"""
+        return self.next_available_time
+
+    def wait_till_next_day(self):
+        """Mets à jour le next available time avec le début de la prochaine journée"""
+        num_day = self.next_available_time / 1440
+        self.next_available_time = ((num_day+1)*1440) + 540
+        
+
     def __str__(self):
         return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.get_next_available_working_time())
-
-
-    def tick_to_next_minute(self):
-        """Avance à la prochaine minute disponible de l'elfe"""
-        available_time = self.get_next_available_working_time()
-
-        if available_time.hour == 18 and available_time.minute == 59:
-            self.next_available_working_time = available_time + datetime.timedelta(minutes=9*60+5*60+1)
-        else:
-            self.next_available_working_time = available_time + datetime.timedelta(minutes=1)
-
-    def evaluate_finish_time_for(self, toy):
-        """Evalue le timestamp de fin de création d'un jouet"""
-        # Mise à jour next available time
-        start_available_working_time = self.next_available_time
-        toy_duration = toy.get_duration()
-        #toy_required_minutes = int(math.ceil(toy_duration / self.rating))
-        toy_required_minutes = int(math.ceil(toy_duration / self.rating))
-        return start_available_working_time + toy_required_minutes
-
 
     def make_toy(self, toy, wcsv):
         """Fait un jouet"""
@@ -86,72 +75,6 @@ class Elf:
 
         # print(self)
         # print(self.get_next_available_working_time())
-
-    def set_rating(self, rating):
-        """Met à jour manuellement le rating de l'elfe"""
-        self.rating = rating
-
-    def apply_strategy_for(self, thetoypool, theelfpool, wcsv):
-        """Procedure la plus complexe, applique la stratégie de l'elfe selectionné pour un toypool et un elfpool donné"""
-        # Si rien on sort
-        if len(thetoypool) == 0:
-            return
-
-        # print(self)
-        # Recupération d'un jouet au hasard dans le toy pool que l'elfe pourrai faire
-        toy = thetoypool.get_random_toy_for_elf(self)
-        # print(len(thetoypool), len(theelfpool))
-        # print(toy)
-
-        # Cas 1 : L'elfe dispose d'assez de temps pour réaliser le jouet dans la journée
-        if(self.will_finish_toy_in_sanctionned_hours(toy)):
-            self.make_toy(toy, wcsv)
-        else:
-        # Cas 2 : L'elfe ne dispose d'assez de temps pour réaliser le jouet dans la journée
-            while True:
-                if not thetoypool.toy_left_for_elf(self):
-                    self.make_toy(toy, wcsv)
-                    break
-
-                short_toy = thetoypool.get_next_short_toy_for(self)
-
-                if self.will_finish_toy_in_sanctionned_hours(short_toy):
-                    self.make_toy(short_toy, wcsv)
-                else:
-                    self.make_toy(short_toy, wcsv)
-                    self.make_toy(toy, wcsv)
-                    break
-
-    def set_next_available_working_time(self, thetimestamp):
-        """Mets à jour manuellement le working time"""
-        self.next_available_working_time = thetimestamp
-        self.next_available_time = int(((thetimestamp-self.__time_base).total_seconds())/60)
-
-    def get_next_available_working_time(self):
-        """Recupere le prochain timestamp de disponibilite de l'elfe"""
-        return self.next_available_working_time
-
-    def will_finish_toy_in_sanctionned_hours(self, toy):
-        """Le jouet va-t-il être fini dans les heures ouvrées"""
-        elf_working_timestamp = self.get_next_available_working_time()
-        
-        toy_duration = toy.get_duration()
-
-        toy_required_minutes = int(math.ceil(toy_duration / self.rating))
-
-        if toy_required_minutes > 600:
-            return False
-        else:
-            next_elf_working_timestamp = elf_working_timestamp + datetime.timedelta(minutes=toy_required_minutes)
-            if next_elf_working_timestamp.date() > elf_working_timestamp.date():
-                return False
-            else:
-                if next_elf_working_timestamp.hour == 19 and next_elf_working_timestamp.minute == 0:
-                    return True
-                elif next_elf_working_timestamp.hour < 19:
-                    return True
-                else:
-                    return False
 
     def update_elf(self, hrs, toy, start_minute, duration):
         """ Updates the elf's productivity rating and next available time based on last toy completed.
