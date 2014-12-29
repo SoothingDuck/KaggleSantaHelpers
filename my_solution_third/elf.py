@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import unittest
 import math
-import hours as hrs
 import datetime
-import os
-import csv
-
-from toy import Toy
+import hours as hrs
 
 class Elf:
     """ Each Elf starts with a rating of 1.0 and are available at 09:00 on Jan 1.  """
@@ -20,11 +15,27 @@ class Elf:
         
         self.hrs = hrs.Hours()
 
-        self.__time_base = datetime.datetime(2014,1,1,0,0,0)
+        self.ref_time = datetime.datetime(2014, 1, 1, 0, 0)
 
     def get_next_available_time(self):
         """Recupere le next_available_time"""
         return self.next_available_time
+
+    def set_productivity(self, productivity):
+        """Mets à jour manuellement la productivité"""
+        self.rating = productivity
+
+    def get_productivity(self):
+        """Récupère la productivité"""
+        return self.rating
+
+    def set_next_available_time(self, minute):
+        """Mets à jour manuellement le next available time"""
+        self.next_available_time = minute
+
+    def num_of_working_minutes_left(self):
+        """Récupère le nombre de minutes de travail restantes"""
+        raise Exception("TODO")
 
     def wait_till_next_day(self):
         """Mets à jour le next available time avec le début de la prochaine journée"""
@@ -33,14 +44,13 @@ class Elf:
         
 
     def __str__(self):
-        return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.get_next_available_working_time())
+        return "Elf %s : Productivity %f, Next Available : %s" % (self.id, self.rating, self.get_next_available_time())
 
     def make_toy(self, toy, wcsv):
         """Fait un jouet"""
 
         # Mise à jour next available time
-        start_available_working_time = self.get_next_available_working_time()
-        start_minute = int(((start_available_working_time-self.__time_base).total_seconds())/60)
+        start_minute = self.get_next_available_time()
         toy_duration = toy.get_duration()
         toy_required_minutes = int(math.ceil(toy_duration / self.rating))
 
@@ -52,14 +62,11 @@ class Elf:
         # print(start_minute, end_minute)
         if unsanctioned == 0:
             if self.hrs.is_sanctioned_time(end_minute):
-                #self.next_available_time = end_minute
-                self.set_next_available_working_time(start_available_working_time+datetime.timedelta(minutes=end_minute-start_minute))
+                self.next_available_time = end_minute
             else:
-                #self.next_available_time = self.hrs.next_sanctioned_minute(end_minute)
-                self.set_next_available_working_time(start_available_working_time+datetime.timedelta(minutes=self.hrs.next_sanctioned_minute(end_minute)-start_minute))
+                self.next_available_time = self.hrs.next_sanctioned_minute(end_minute)
         else:
-            #self.next_available_time = self.hrs.apply_resting_period(end_minute, unsanctioned)
-            self.set_next_available_working_time(start_available_working_time+datetime.timedelta(minutes=self.hrs.apply_resting_period(end_minute, unsanctioned)-start_minute))
+            self.next_available_time = self.hrs.apply_resting_period(end_minute, unsanctioned)
 
         # Mise à jour productivité
         self.rating = max(0.25,
@@ -68,7 +75,7 @@ class Elf:
 
         # Ecriture du jouet
         # print(toy)
-        tt = start_available_working_time
+        tt = self.ref_time + datetime.timedelta(minutes=start_minute)
         # print "tt : %s" % tt
         time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
         wcsv.writerow([toy.id, self.id, time_string, toy_required_minutes])
@@ -125,74 +132,3 @@ class Elf:
                               (self.rating_decrease ** (unsanctioned/60.0))))
 
 
-class ElfTest(unittest.TestCase):
-
-    def setUp(self):
-        self.elf_productivity_1 = Elf(1)
-        self.elf_productivity_2 = Elf(2)
-        self.elf_productivity_3 = Elf(3)
-        self.elf_productivity_2.set_rating(2)
-
-        soln_file = os.path.join(os.getcwd(), 'test.csv')
-        self.wcsv = csv.writer(open(soln_file, "wb"))
-
-
-    def test_get_available_time(self):
-        elf = Elf(1)
-        self.assertEqual(elf.get_next_available_working_time(), datetime.datetime(2014,1,1,9,0,0))
-        elf.set_next_available_working_time(datetime.datetime(2014, 1, 1, 11, 40))
-        self.assertEqual(elf.get_next_available_working_time(), datetime.datetime(2014,1,1,11,40,0))
-
-
-    def test_make_toy(self):
-        elf1 = Elf(1, datetime.datetime(2014, 1, 1, 9, 0, 0))
-        elf2 = Elf(2, datetime.datetime(2014, 1, 1, 9, 0, 0))
-        elf3 = Elf(3, datetime.datetime(2014, 1, 1, 18, 59, 0))
-
-        elf2.set_rating(2)
-
-        toy1 = Toy(1, "2014 1 1 0 0", 600)
-        toy2 = Toy(2, "2014 1 1 0 0", 600)
-        toy3 = Toy(3, "2014 1 1 0 0", 1)
-        toy4 = Toy(4, "2014 1 1 0 0", 2)
-
-        elf1.make_toy(toy1, self.wcsv)
-        self.assertEquals(elf1.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 0, 0))
-
-        elf1.make_toy(toy3, self.wcsv)
-        self.assertEquals(elf1.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 1, 0))
-
-        elf2.make_toy(toy2, self.wcsv)
-        self.assertEquals(elf2.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 14, 0, 0))
-
-        elf3.make_toy(toy4, self.wcsv)
-        self.assertEquals(elf3.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 1, 0))
-
-    def test_will_finish_toy_in_sanctionned_hours(self):
-        toy1 = Toy(1, "2014 1 1 0 0", 600)
-        toy2 = Toy(1, "2014 1 1 0 0", 601)
-
-        self.assertTrue(self.elf_productivity_1.will_finish_toy_in_sanctionned_hours(toy1))
-        self.assertFalse(self.elf_productivity_1.will_finish_toy_in_sanctionned_hours(toy2))
-
-        self.assertTrue(self.elf_productivity_2.will_finish_toy_in_sanctionned_hours(toy1))
-        self.assertTrue(self.elf_productivity_2.will_finish_toy_in_sanctionned_hours(toy2))
-
-    def test_tick_to_next_minute(self):
-
-        elf = Elf(1, datetime.datetime(2014, 1, 1, 18, 58, 0))
-
-        self.assertEquals(elf.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 18, 58))
-
-        elf.tick_to_next_minute()
-        self.assertEquals(elf.get_next_available_working_time(), datetime.datetime(2014, 1, 1, 18, 59))
-
-        elf.tick_to_next_minute()
-        self.assertEquals(elf.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 0))
-
-        elf.tick_to_next_minute()
-        self.assertEquals(elf.get_next_available_working_time(), datetime.datetime(2014, 1, 2, 9, 1))
-
-
-if __name__ == '__main__':
-    unittest.main()
