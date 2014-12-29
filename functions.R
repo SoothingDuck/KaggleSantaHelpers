@@ -18,6 +18,19 @@ get.sanctioned.breakdown <- function(start.minute, toy.duration, productivity) {
   return(list(sanctioned=sanctioned, unsanctioned=unsanctioned))
 }
 
+get.next.productivity <- function(start.minute, toy.duration, productivity) {
+  t <- get.sanctioned.breakdown(start.minute, toy.duration, productivity)
+  
+  sanctioned <- t$sanctioned
+  unsanctioned <- t$unsanctioned
+  
+  next.p <- max(0.25,
+                    min(4.0, productivity * (1.02 ** (sanctioned/60.0)) *
+                          (0.9 ** (unsanctioned/60.0))))
+  
+  return(next.p)
+}
+
 next_sanctioned_minute <- function(tps.minute) {
   # next minute is a sanctioned minute
   if(is_sanctioned_time(tps.minute) & is_sanctioned_time(tps.minute+1)) {

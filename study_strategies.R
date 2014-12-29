@@ -33,3 +33,12 @@ vec <- mapply(get.next.available.time, df$minute.begin.big.object, 20000, df$las
 df$last.minute <- vec
 
 ggplot(df) + geom_point(aes(x=duration, y=last.minute))
+
+# Low productivity
+df <- data.frame(
+  duration=seq(0,20000,5)
+  )
+
+df$last.productivity <- sapply(df$duration, function(x) { get.next.productivity(540, x, 4.0) })
+
+ggplot(df) + geom_point(aes(x=duration, y=last.productivity))
