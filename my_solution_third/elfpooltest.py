@@ -20,6 +20,25 @@ class ElfPoolTest(unittest.TestCase):
         self.assertEquals(len(self.pool), 3)
 
 
+    def test_update_elf(self):
+
+        elf1 = self.pool.next_available_elf()
+
+        self.assertEquals(elf1.get_next_available_time(), 540)
+
+        elf1.wait_till_next_day()
+
+        self.pool.update_elf(elf1)
+
+        self.assertEquals(len(self.pool), 2)
+
+        elf2 = self.pool.next_available_elf()
+        elf3 = self.pool.next_available_elf()
+
+        self.assertEquals(elf1, elf3)
+
+        self.assertEquals(elf3.get_next_available_time(), 540+1440)
+
     def test_next_available_elf(self):
         
         elf1 = self.pool.next_available_elf()
