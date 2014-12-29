@@ -1,6 +1,4 @@
-Prend un jouet au hasard dans les jouets disponibles pour tout le monde
-(mettre en place une séparation waiting list et available list dans toypool)
+Biggie Smalls strategy
 
-Pour chaque jouet évaluer l'elfpool et le donner à l'elfe qui le terminera le plus tôt
-
-si suite à une mise jour d'available list cette dernière est vide alors se baser sur le timestamp du prochain elfe
+Eat as many small object as possible to go till some productivity threshold
+and then eat the biggest object

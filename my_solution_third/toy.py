@@ -12,7 +12,6 @@ class Toy:
         self.arrival_minute = Hours.convert_to_minute(arrival)
         self.duration = int(duration)
         self.completed_minute = 0
-        self.min_possible_working_start_time = None
 
         self.__time_base = datetime.datetime(2014, 1, 1, 0, 0)
 
@@ -46,26 +45,19 @@ class Toy:
 
     def get_min_possible_working_start_time(self):
         """Selon l'heure d'arrivée, retourne le timestamp minimum de début de travail"""
-        if self.min_possible_working_start_time is not None:
-            return self.min_possible_working_start_time
+        current_date = self.reference_start_time + datetime.timedelta(minutes=self.arrival_minute)
+        year = current_date.year
+        month = current_date.month
+        day = current_date.day
+        hour = current_date.hour
+        minute = current_date.minute
+
+        if hour < 9:
+            return datetime.datetime(year, month, day, 9, 0, 0)
+        elif hour >= 19 and minute > 0:
+            return datetime.datetime(year, month, day, 9, 0, 0) + datetime.timedelta(days=1)
         else:
-
-            current_date = self.reference_start_time + datetime.timedelta(minutes=self.arrival_minute)
-            year = current_date.year
-            month = current_date.month
-            day = current_date.day
-            hour = current_date.hour
-            minute = current_date.minute
-
-            if hour < 9:
-                self.min_possible_working_start_time = datetime.datetime(year, month, day, 9, 0, 0)
-                return datetime.datetime(year, month, day, 9, 0, 0)
-            elif hour >= 19 and minute > 0:
-                self.min_possible_working_start_time = datetime.datetime(year, month, day, 9, 0, 0) + datetime.timedelta(days=1)
-                return datetime.datetime(year, month, day, 9, 0, 0) + datetime.timedelta(days=1)
-            else:
-                self.min_possible_working_start_time = current_date
-                return current_date
+            return current_date
         
 
 class ToyTest(unittest.TestCase):
