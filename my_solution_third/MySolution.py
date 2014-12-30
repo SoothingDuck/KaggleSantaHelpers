@@ -10,6 +10,8 @@ import os
 import csv
 import sys
 import heapq
+import random
+
 # ======================================================================= #
 # === MAIN === #
 
@@ -55,8 +57,8 @@ if __name__ == '__main__':
         #   1 jouet au hasard parmi ceux disponibles
         #   Si on peut traiter l'objet dans la journée, le faire et mettre à jour la date de disponibilité de l'elfe
         #   Sinon planifier l'objet pour le lendemain matin et le traiter et remplir le reste de la journée avec des objets "courts"
-        if mytoypool.length_available_list() % 1000 == 0:
-            print("TOYPOOL LEN : %d, ELFPOOL LEN : %d" % (mytoypool.length_available_list()+mytoypool.length_waiting_list(), len(myelfpool)))
+        if len(mytoypool) % 1000 == 0:
+            print("TOYPOOL LEN : %d, ELFPOOL LEN : %d" % (len(mytoypool), len(myelfpool)))
 
         # Etape 1 : Prendre le prochain elfe disponible
         elf = myelfpool.next_available_elf()
