@@ -35,7 +35,16 @@ class Elf:
 
     def num_of_working_minutes_left(self):
         """Récupère le nombre de minutes de travail restantes"""
-        raise Exception("TODO")
+        tmp = self.get_next_available_time()
+        tmp = tmp % 1440
+
+        if tmp < 540:
+            return 0
+        elif tmp > 19*60:
+            return 0
+        else:
+            return (19*60)-tmp
+
 
     def wait_till_next_day(self):
         """Mets à jour le next available time avec le début de la prochaine journée"""
