@@ -57,11 +57,14 @@ if __name__ == '__main__':
         #   1 jouet au hasard parmi ceux disponibles
         #   Si on peut traiter l'objet dans la journée, le faire et mettre à jour la date de disponibilité de l'elfe
         #   Sinon planifier l'objet pour le lendemain matin et le traiter et remplir le reste de la journée avec des objets "courts"
-        if len(mytoypool) % 1000 == 0:
-            print("TOYPOOL LEN : %d, ELFPOOL LEN : %d" % (len(mytoypool), len(myelfpool)))
+        if mytoypool.length_waiting_list() % 1000 == 0:
+            print("TOYPOOL WAITING LEN : %d, TOYPOOL AVAILABLE LEN : %d, ELFPOOL LEN : %d" % (mytoypool.length_waiting_list(), mytoypool.length_available_list(), len(myelfpool)))
 
         # Etape 1 : Prendre le prochain elfe disponible
         elf = myelfpool.next_available_elf()
+
+        # Etape 1 Bis : Mettre à jour le toy pool par rapport à la date de disponibilité de l'elfe
+        mytoypool.update_available_toy_list_according_to_elf(elf)
 
         # Etape 2 : Recupérer la productivité de l'elfe
         productivity = elf.get_productivity()
