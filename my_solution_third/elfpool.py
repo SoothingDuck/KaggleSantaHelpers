@@ -8,7 +8,7 @@ class ElfPool:
     def __init__(self, n):
         # Liste des elfes triés par temps de disponibilité
         self.__heap_elf = []
-        for i in range(n):
+        for i in range(1,n+1):
             heapq.heappush(self.__heap_elf, (540, Elf(i)))
 
     def __len__(self):
