@@ -36,7 +36,7 @@ if __name__ == '__main__':
     MINUTES_LEFT_END_OF_DAY = 60
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
-    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_second_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
+    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_third_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
 
     # Objet hours
     hrs = Hours()
@@ -74,7 +74,9 @@ if __name__ == '__main__':
             if mytoypool.length_available_list() > 0:
                 break
             else:
-                elf.set_next_available_time(hrs.next_sanctioned_minute(elf.get_next_available_time()))
+                t = elf.get_next_available_time()
+                next_t = hrs.next_sanctioned_minute(t)
+                elf.set_next_available_time(next_t)
 
 
         # Etape 2 : Recupérer la productivité de l'elfe
