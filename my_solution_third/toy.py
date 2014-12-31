@@ -15,6 +15,10 @@ class Toy:
 
         self.__time_base = datetime.datetime(2014, 1, 1, 0, 0)
 
+    def get_id(self):
+        """Retourne l'id du jouet"""
+        return self.id
+
     def __str__(self):
         return "Toy %s : Min Start Working Time %s, Duration %s, Completed %s" % (self.id, self.get_min_possible_working_start_time(), self.duration, self.completed_minute)
 

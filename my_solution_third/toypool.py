@@ -18,6 +18,7 @@ class ToyPool:
 
         # Available toy by duration
         self.__hash_toy_duration = {}
+        self.__hash_all_toys = {}
 
         # Available toy counter
         self.__available_toy_count = 0
@@ -30,7 +31,31 @@ class ToyPool:
 
     def push_toy_in_available_list(self, toy):
         """Rends le jouet disponible"""
-        raise Exception("TODO")
+        duration = toy.get_duration()
+
+        # Verifie si l'index existe déjà
+        i = bisect.bisect_left(self.__available_toy_duration, duration)
+        if i != len(self.__available_toy_duration) and self.__available_toy_duration[i] == duration:
+            # Ok la valeur existe on ne fait rien
+            pass
+        else:
+            # On l'ajoute
+            self.__available_toy_duration.insert(i, duration)
+
+        # Update hash all toys
+        id = toy.get_id()
+        self.__hash_all_toys[id] = 1
+
+        # Update hash duration
+        if not self.__hash_toy_duration.has_key(duration):
+            self.__hash_toy_duration[duration] = []
+
+        self.__hash_toy_duration[duration].append(toy)
+
+        # Mise à jour du toy count
+        self.__available_toy_count += 1
+        
+
 
     def update_available_toy_list_according_to_elf(self, elf):
         """Mets à jour la liste des cadeaux disponibles"""

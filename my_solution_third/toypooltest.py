@@ -24,6 +24,29 @@ class ToyPoolTest(unittest.TestCase):
         self.toy_small_pool.push_toy_in_waiting_list(self.toy2)
         self.toy_small_pool.push_toy_in_waiting_list(self.toy3)
 
+    def test_push_toy_in_available_list(self):
+
+        self.assertEquals(self.toy_small_pool.length_waiting_list(), 3)
+        self.assertEquals(self.toy_small_pool.length_available_list(), 0)
+
+        toy_timestamp, toy = self.toy_small_pool.pop_toy_from_waiting_list()
+
+        self.toy_small_pool.push_toy_in_available_list(toy)
+        
+        self.assertEquals(self.toy_small_pool.length_waiting_list(), 2)
+        self.assertEquals(self.toy_small_pool.length_available_list(), 1)
+
+        self.assertEquals(self.toy_small_pool.get_available_toy_duration(), [600])
+        self.assertEquals(self.toy_small_pool.get_available_toy_hash(), { 600 : [self.toy1] })
+
+        self.elf.wait_till_next_day()
+        self.toy_small_pool.update_available_toy_list_according_to_elf(self.elf)
+
+        self.assertEquals(self.toy_small_pool.length_waiting_list(), 0)
+        self.assertEquals(self.toy_small_pool.length_available_list(), 3)
+
+        self.assertEquals(self.toy_small_pool.get_available_toy_duration(), [2, 60, 600])
+
     def test_pop_toy_from_waiting_list(self):
         
         self.assertEquals(self.toy_small_pool.length_waiting_list(), 3)
@@ -32,6 +55,8 @@ class ToyPoolTest(unittest.TestCase):
 
         self.assertEquals(toy_timestamp, 8*60)
         self.assertEquals(toy, self.toy1)
+
+        self.assertEquals(self.toy_small_pool.length_waiting_list(), 2)
 
     def test_empty(self):
         self.assertTrue(self.toy_empty_pool.empty())
