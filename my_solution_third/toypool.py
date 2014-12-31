@@ -22,13 +22,23 @@ class ToyPool:
         # Available toy counter
         self.__available_toy_count = 0
 
+
+    def pop_toy_from_waiting_list(self):
+        """Prends un jouet de la waiting list"""
+        toy_timestamp, toy = heapq.heappop(self.__waiting_timestamp_heap)
+        return(toy_timestamp, toy)
+
+    def push_toy_in_available_list(self, toy):
+        """Rends le jouet disponible"""
+        raise Exception("TODO")
+
     def update_available_toy_list_according_to_elf(self, elf):
         """Mets à jour la liste des cadeaux disponibles"""
         if self.length_waiting_list() > 0:
             elf_timestamp = elf.get_next_available_time()
 
             while True:
-                toy_timestamp, toy = heapq.heappop(self.__waiting_timestamp_heap)
+                toy_timestamp, toy = self.pop_toy_from_waiting_list()
                 if toy_timestamp <= elf_timestamp:
                     self.push_toy_in_available_list(toy)
                 else:
