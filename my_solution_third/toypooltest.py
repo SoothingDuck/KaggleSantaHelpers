@@ -109,6 +109,11 @@ class ToyPoolTest(unittest.TestCase):
         self.assertTrue(toy_of_duration_65 is not None)
         self.assertEquals(self.toy_small_pool.get_available_toy_duration(), [600])
 
+        # Jouet trop grand
+        toy_of_duration_650 = self.toy_small_pool.get_toy_by_duration(650)
+        self.assertTrue(toy_of_duration_650 is not None)
+        self.assertEquals(self.toy_small_pool.get_available_toy_duration(), [])
+
     def test_pop_toy_from_waiting_list(self):
         
         self.assertEquals(self.toy_small_pool.length_waiting_list(), 4)

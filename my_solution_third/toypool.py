@@ -65,22 +65,28 @@ class ToyPool:
     def get_toy_by_duration(self, duration):
         """Recupere par duration"""
         i = bisect.bisect_left(self.__available_toy_duration, duration)
+    
+        min_possible_duration = self.__available_toy_duration[0]
+
+        if duration < min_possible_duration:
+            return
         
-        if self.__available_toy_duration[i] == duration:
+        if i == len(self.__available_toy_duration):
+            pass
+        elif self.__available_toy_duration[i] == duration:
             i = i + 1
 
-        if i != len(self.__available_toy_duration) and i != 0:
-            while True:
-                duration_found = self.__available_toy_duration[i-1]
-                toy = self.__hash_toy_duration[duration_found].pop()
-                toy_id = toy.get_id()
-                if self.__hash_all_toys.has_key(toy_id):
-                    del self.__hash_all_toys[toy_id]
-                    if self.__hash_toy_duration[duration_found] == []:
-                        del self.__hash_toy_duration[duration_found]
-                        del self.__available_toy_duration[i-1]
-                    self.__available_toy_count -= 1
-                    return toy
+        while True:
+            duration_found = self.__available_toy_duration[i-1]
+            toy = self.__hash_toy_duration[duration_found].pop()
+            toy_id = toy.get_id()
+            if self.__hash_all_toys.has_key(toy_id):
+                del self.__hash_all_toys[toy_id]
+                if self.__hash_toy_duration[duration_found] == []:
+                    del self.__hash_toy_duration[duration_found]
+                    del self.__available_toy_duration[i-1]
+                self.__available_toy_count -= 1
+                return toy
 
     def get_next_shortest_toy(self):
         """Recupere le jouet le plus court suivant"""

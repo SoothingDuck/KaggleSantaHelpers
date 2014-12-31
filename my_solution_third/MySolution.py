@@ -3,6 +3,7 @@
 
 from toypool import ToyPool
 from elfpool import ElfPool
+from hours import Hours
 
 import datetime
 import time
@@ -37,6 +38,9 @@ if __name__ == '__main__':
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
     soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_second_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
 
+    # Objet hours
+    hrs = Hours()
+
     # Création du pool d'elfes
     myelfpool = ElfPool(NUM_ELVES)
 
@@ -64,7 +68,14 @@ if __name__ == '__main__':
         elf = myelfpool.next_available_elf()
 
         # Etape 1 Bis : Mettre à jour le toy pool par rapport à la date de disponibilité de l'elfe
-        mytoypool.update_available_toy_list_according_to_elf(elf)
+        # Avancer jusqu'à ce qu'il y ait des jouets dans l'available list
+        while True:
+            mytoypool.update_available_toy_list_according_to_elf(elf)
+            if mytoypool.length_available_list() > 0:
+                break
+            else:
+                elf.set_next_available_time(hrs.next_sanctioned_minute(elf.get_next_available_time()))
+
 
         # Etape 2 : Recupérer la productivité de l'elfe
         productivity = elf.get_productivity()
