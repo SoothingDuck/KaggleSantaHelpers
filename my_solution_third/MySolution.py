@@ -85,7 +85,7 @@ if __name__ == '__main__':
         # Etape 2, Cas 1 : La productivité est supérieure au seuil
         if productivity > PRODUCTIVITY_THRESHOLD:
             # Etape 3 : Récupérer le jouet le plus gros disponible
-            toy = mytoypool.get_biggest_toy()
+            toy = mytoypool.get_next_longest_toy_for_elf()
 
             # Etape 4 : Faire le jouet
             elf.make_toy(toy, wcsv)

@@ -28,6 +28,12 @@ class ToyPool:
         """Retourne la liste des durations possibles"""
         return self.__available_toy_duration
 
+    def get_hash_toy_duration_timestamp(self):
+        return self.__hash_toy_duration_timestamp
+
+    def get_hash_toy_duration_values(self):
+        return self.__hash_toy_duration_values
+
     def pop_toy_from_waiting_list(self):
         """Prends un jouet de la waiting list"""
         toy_timestamp, toy = heapq.heappop(self.__waiting_timestamp_heap)
@@ -89,6 +95,8 @@ class ToyPool:
                 return None
             
             toy = self.__hash_toy_duration_values[duration_found].pop(j-1)
+            toy_timestamp = self.__hash_toy_duration_timestamp[duration_found].pop(j-1)
+
             toy_id = toy.get_id()
             if self.__hash_all_toys.has_key(toy_id):
                 del self.__hash_all_toys[toy_id]
@@ -98,46 +106,56 @@ class ToyPool:
                     del self.__available_toy_duration[i-1]
                 self.__available_toy_count -= 1
                 return toy
+
+    def get_next_longest_toy_for_elf(self, elf):
+        """Recupere le jouet le plus court suivant"""
+
+        elf_timestamp = elf.get_next_available_time()
+
+        possible_durations = self.__available_toy_duration
+
+        for i in reversed(xrange(len(possible_durations))):
+            duration_found = possible_durations[i]
+            min_toy_duration = self.__hash_toy_duration_timestamp[duration_found][0]
+
+            if min_toy_duration <= elf_timestamp:
+
+                toy_timestamp = self.__hash_toy_duration_timestamp[duration_found].pop(0)
+                toy = self.__hash_toy_duration_values[duration_found].pop(0)
+                toy_id = toy.get_id()
+                if self.__hash_all_toys.has_key(toy_id):
+                    del self.__hash_all_toys[toy_id]
+                    if self.__hash_toy_duration_timestamp[duration_found] == []:
+                        del self.__hash_toy_duration_timestamp[duration_found]
+                        del self.__hash_toy_duration_values[duration_found]
+                        del self.__available_toy_duration[i]
+                    self.__available_toy_count -= 1
+                    return toy
 
     def get_next_shortest_toy_for_elf(self, elf):
         """Recupere le jouet le plus court suivant"""
 
         elf_timestamp = elf.get_next_available_time()
 
-        raise Exception("TODO")
-        i = bisect.bisect_left(self.__available_toy_duration, duration)
-    
-        min_possible_duration = self.__available_toy_duration[0]
+        possible_durations = self.__available_toy_duration
 
-        if duration < min_possible_duration:
-            return
-        
-        if i == len(self.__available_toy_duration):
-            pass
-        elif self.__available_toy_duration[i] == duration:
-            i = i + 1
+        for i in xrange(len(possible_durations)):
+            duration_found = possible_durations[i]
+            min_toy_duration = self.__hash_toy_duration_timestamp[duration_found][0]
 
-        while True:
-            possible_durations = self.__available_toy_duration[:i]
+            if min_toy_duration <= elf_timestamp:
 
-            for duration_found in reversed(possible_durations):
-                j = bisect.bisect_left(self.__hash_toy_duration_timestamp[duration_found], elf_timestamp)
-                if j != 0:
-                    break
-
-            if j == 0:
-                return None
-            
-            toy = self.__hash_toy_duration_values[duration_found].pop(j-1)
-            toy_id = toy.get_id()
-            if self.__hash_all_toys.has_key(toy_id):
-                del self.__hash_all_toys[toy_id]
-                if self.__hash_toy_duration_timestamp[duration_found] == []:
-                    del self.__hash_toy_duration_timestamp[duration_found]
-                    del self.__hash_toy_duration_values[duration_found]
-                    del self.__available_toy_duration[i-1]
-                self.__available_toy_count -= 1
-                return toy
+                toy_timestamp = self.__hash_toy_duration_timestamp[duration_found].pop(0)
+                toy = self.__hash_toy_duration_values[duration_found].pop(0)
+                toy_id = toy.get_id()
+                if self.__hash_all_toys.has_key(toy_id):
+                    del self.__hash_all_toys[toy_id]
+                    if self.__hash_toy_duration_timestamp[duration_found] == []:
+                        del self.__hash_toy_duration_timestamp[duration_found]
+                        del self.__hash_toy_duration_values[duration_found]
+                        del self.__available_toy_duration[i]
+                    self.__available_toy_count -= 1
+                    return toy
 
     def has_available_toy(self, toy):
         """Le jouet est-il disponible"""
