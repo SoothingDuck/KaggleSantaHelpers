@@ -23,6 +23,13 @@ class ToyPool:
         # Available toy counter
         self.__available_toy_count = 0
 
+    def get_available_toy_duration(self):
+        """Retourne la liste des durations possibles"""
+        return self.__available_toy_duration
+
+    def get_available_toy_hash(self):
+        """Retourne la liste des durations possibles"""
+        return self.__hash_toy_duration
 
     def pop_toy_from_waiting_list(self):
         """Prends un jouet de la waiting list"""
@@ -56,6 +63,10 @@ class ToyPool:
         self.__available_toy_count += 1
         
 
+    def has_available_toy(self, toy):
+        """Le jouet est-il disponible"""
+        id = toy.get_id()
+        return self.__hash_all_toys.has_key(id)
 
     def update_available_toy_list_according_to_elf(self, elf):
         """Mets à jour la liste des cadeaux disponibles"""
@@ -63,6 +74,9 @@ class ToyPool:
             elf_timestamp = elf.get_next_available_time()
 
             while True:
+                if self.length_waiting_list() <= 0:
+                    break
+
                 toy_timestamp, toy = self.pop_toy_from_waiting_list()
                 if toy_timestamp <= elf_timestamp:
                     self.push_toy_in_available_list(toy)
