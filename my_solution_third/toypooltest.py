@@ -4,6 +4,7 @@ import unittest
 import os
 
 from toypool import ToyPool
+from elfpool import ElfPool
 from elf import Elf
 from toy import Toy
 
@@ -25,6 +26,66 @@ class ToyPoolTest(unittest.TestCase):
         self.toy_small_pool.push_toy_in_waiting_list(self.toy2)
         self.toy_small_pool.push_toy_in_waiting_list(self.toy3)
         self.toy_small_pool.push_toy_in_waiting_list(self.toy4)
+
+    def test_walk_all_durations(self):
+
+        toy_pool = ToyPool()
+        toy1 = Toy(1, "2014 1 1 9 5", 30)
+        toy2 = Toy(2, "2014 1 1 10 5", 20)
+        toy3 = Toy(3, "2014 1 1 8 5", 10)
+        toy_pool.push_toy_in_waiting_list(toy1)
+        toy_pool.push_toy_in_waiting_list(toy2)
+        toy_pool.push_toy_in_waiting_list(toy3)
+
+        elf_pool = ElfPool(2)
+
+        elf1 = elf_pool.next_available_elf()
+        toy_pool.update_available_toy_list_according_to_elf(elf1) # 1 et 2 dans available
+
+        # On prends un 31
+        toy = toy_pool.get_toy_by_duration(30)
+        self.assertEquals(toy, toy3)
+
+    def test_behaviour(self):
+
+        toy_pool = ToyPool()
+        toy1 = Toy(1, "2014 1 1 9 5", 20)
+        toy2 = Toy(2, "2014 1 1 8 5", 30)
+        toy3 = Toy(3, "2014 1 1 8 3", 15)
+        toy_pool.push_toy_in_waiting_list(toy1)
+        toy_pool.push_toy_in_waiting_list(toy2)
+        toy_pool.push_toy_in_waiting_list(toy3)
+
+        elf_pool = ElfPool(2)
+
+        elf1 = elf_pool.next_available_elf()
+
+        toy_pool.update_available_toy_list_according_to_elf(elf1) # 1 et 2 dans available
+
+        # on essaye de prendre un duration 10
+        toy = toy_pool.get_toy_by_duration(10)
+        self.assertTrue(toy is None)
+
+        # on essaye de prendre un duration 30
+        toy = toy_pool.get_toy_by_duration(30)
+        self.assertEquals(toy, toy2)
+
+        # on pousse l'elfe au lendemain
+        elf1.wait_till_next_day()
+
+        # on mets à jour
+        toy_pool.update_available_toy_list_according_to_elf(elf1)
+
+        # changment d'elfe
+        elf2 = elf_pool.next_available_elf()
+
+        # On essaye de prendre un duration 17
+        toy = toy_pool.get_toy_by_duration(17)
+        self.assertTrue(toy is None)
+
+        # On essaye de prendre un duration 21
+        toy = toy_pool.get_toy_by_duration(21)
+        self.assertEquals(toy, toy1)
 
     def test_get_next_shortest_toy(self):
 
