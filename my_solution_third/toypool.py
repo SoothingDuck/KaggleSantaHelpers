@@ -82,6 +82,22 @@ class ToyPool:
                     self.__available_toy_count -= 1
                     return toy
 
+    def get_next_shortest_toy(self):
+        """Recupere le jouet le plus court suivant"""
+        i = 1
+        
+        if len(self.__available_toy_duration) != 0 and i != 0:
+            while True:
+                duration_found = self.__available_toy_duration[i-1]
+                toy = self.__hash_toy_duration[duration_found].pop()
+                toy_id = toy.get_id()
+                if self.__hash_all_toys.has_key(toy_id):
+                    del self.__hash_all_toys[toy_id]
+                    if self.__hash_toy_duration[duration_found] == []:
+                        del self.__hash_toy_duration[duration_found]
+                        del self.__available_toy_duration[i-1]
+                    self.__available_toy_count -= 1
+                    return toy
 
     def has_available_toy(self, toy):
         """Le jouet est-il disponible"""
