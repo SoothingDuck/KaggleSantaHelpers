@@ -67,10 +67,9 @@ class ToyPool:
         # Mise à jour du toy count
         self.__available_toy_count += 1
 
-    def get_toy_by_duration_for_elf(self, elf, duration, debug=False):
+    def get_toy_by_duration_for_elf(self, elf, duration):
         """Recupere par duration"""
         elf_timestamp = elf.get_next_available_time()
-
 
         # Indice de la duration la plus proche 100 => [1, 50, 101] => 1
         i = bisect.bisect_right(self.__available_toy_duration, duration)
@@ -81,11 +80,11 @@ class ToyPool:
         
         while True:
             possible_durations = self.__available_toy_duration[:i]
-            print possible_durations
-
+            
             for duration_found in reversed(possible_durations):
-                print duration, duration_found, elf_timestamp, self.__hash_toy_duration_timestamp[duration_found]
+
                 j = bisect.bisect_right(self.__hash_toy_duration_timestamp[duration_found], elf_timestamp)
+
                 if j != 0:
                     break
 
@@ -96,12 +95,14 @@ class ToyPool:
             toy_timestamp = self.__hash_toy_duration_timestamp[duration_found].pop(j-1)
 
             toy_id = toy.get_id()
+
+
             if self.__hash_all_toys.has_key(toy_id):
                 del self.__hash_all_toys[toy_id]
                 if self.__hash_toy_duration_timestamp[duration_found] == []:
                     del self.__hash_toy_duration_timestamp[duration_found]
                     del self.__hash_toy_duration_values[duration_found]
-                    del self.__available_toy_duration[i-1]
+                    del self.__available_toy_duration[self.__available_toy_duration.index(duration_found)]
                 self.__available_toy_count -= 1
                 return toy
 
@@ -126,7 +127,7 @@ class ToyPool:
                     if self.__hash_toy_duration_timestamp[duration_found] == []:
                         del self.__hash_toy_duration_timestamp[duration_found]
                         del self.__hash_toy_duration_values[duration_found]
-                        del self.__available_toy_duration[i]
+                        del self.__available_toy_duration[self.__available_toy_duration.index(duration_found)]
                     self.__available_toy_count -= 1
                     return toy
 
@@ -151,7 +152,7 @@ class ToyPool:
                     if self.__hash_toy_duration_timestamp[duration_found] == []:
                         del self.__hash_toy_duration_timestamp[duration_found]
                         del self.__hash_toy_duration_values[duration_found]
-                        del self.__available_toy_duration[i]
+                        del self.__available_toy_duration[self.__available_toy_duration.index(duration_found)]
                     self.__available_toy_count -= 1
                     return toy
 
