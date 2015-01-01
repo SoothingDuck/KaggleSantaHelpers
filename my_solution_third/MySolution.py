@@ -105,7 +105,7 @@ if __name__ == '__main__':
 
             # Etape 4.2 : Selectionner un jouet disposant d'un nombre de minutes inférieur à toy_max_minutes
             toy_expected_duration = random.randint(1, toy_max_minutes)
-            toy = mytoypool.get_toy_by_duration(toy_expected_duration)
+            toy = mytoypool.get_toy_by_duration_for_elf(elf, toy_expected_duration)
 
             # Etape 4.2, Cas 1 : Un jouet de ce type n'existe pas
             if toy is None:

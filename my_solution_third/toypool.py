@@ -87,9 +87,15 @@ class ToyPool:
             possible_durations = self.__available_toy_duration[:i]
 
             for duration_found in reversed(possible_durations):
-                j = bisect.bisect_left(self.__hash_toy_duration_timestamp[duration_found], elf_timestamp)
-                if j != 0:
-                    break
+                try:
+                    j = bisect.bisect_left(self.__hash_toy_duration_timestamp[duration_found], elf_timestamp)
+                    if j != 0:
+                        break
+                except:
+                    print len(self.get_hash_toy_duration_timestamp())
+                    print len(self.get_hash_toy_duration_values())
+                    print self.__available_toy_duration
+                    raise
 
             if j == 0:
                 return None
