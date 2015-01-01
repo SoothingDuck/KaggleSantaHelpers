@@ -38,7 +38,7 @@ if __name__ == '__main__':
     i = 0
     for row in fcsv:
         i += 1
-        toy_id, elf_id, ts, dur = row
+        toy_id, elf_id, ts, dur  = row[:4]
         if not hash_elves.has_key(int(elf_id)):
             hash_elves[int(elf_id)] = 1
 
