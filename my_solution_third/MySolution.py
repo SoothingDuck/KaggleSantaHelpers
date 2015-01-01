@@ -53,15 +53,19 @@ if __name__ == '__main__':
     wcsv = csv.writer(w)
     wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
 
+    c = 0
+
     # Début de l'algorithme
     while not mytoypool.empty():
+
+        c += 1
 
         # Apply strategy for all elves in pool 
         #  Pour chaque elfe:
         #   1 jouet au hasard parmi ceux disponibles
         #   Si on peut traiter l'objet dans la journée, le faire et mettre à jour la date de disponibilité de l'elfe
         #   Sinon planifier l'objet pour le lendemain matin et le traiter et remplir le reste de la journée avec des objets "courts"
-        if mytoypool.length_waiting_list() % 1000 == 0:
+        if c % 10000 == 0:
             print("TOYPOOL WAITING LEN : %d, TOYPOOL AVAILABLE LEN : %d, ELFPOOL LEN : %d" % (mytoypool.length_waiting_list(), mytoypool.length_available_list(), len(myelfpool)))
 
         # Etape 1 : Prendre le prochain elfe disponible
@@ -85,7 +89,7 @@ if __name__ == '__main__':
         # Etape 2, Cas 1 : La productivité est supérieure au seuil
         if productivity > PRODUCTIVITY_THRESHOLD:
             # Etape 3 : Récupérer le jouet le plus gros disponible
-            toy = mytoypool.get_next_longest_toy_for_elf()
+            toy = mytoypool.get_next_longest_toy_for_elf(elf)
 
             if toy is not None:
                 # Etape 4 : Faire le jouet
