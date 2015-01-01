@@ -66,36 +66,28 @@ class ToyPool:
 
         # Mise à jour du toy count
         self.__available_toy_count += 1
-        
-    def get_toy_by_duration_for_elf(self, elf, duration):
+
+    def get_toy_by_duration_for_elf(self, elf, duration, debug=False):
         """Recupere par duration"""
         elf_timestamp = elf.get_next_available_time()
 
-        i = bisect.bisect_left(self.__available_toy_duration, duration)
-    
-        min_possible_duration = self.__available_toy_duration[0]
 
-        if duration < min_possible_duration:
+        # Indice de la duration la plus proche 100 => [1, 50, 101] => 1
+        i = bisect.bisect_right(self.__available_toy_duration, duration)
+
+        # Indice 0, la duration est inférieure à la duration la plus petite
+        if i == 0:
             return
         
-        if i == len(self.__available_toy_duration):
-            pass
-        elif self.__available_toy_duration[i] == duration:
-            i = i + 1
-
         while True:
             possible_durations = self.__available_toy_duration[:i]
+            print possible_durations
 
             for duration_found in reversed(possible_durations):
-                try:
-                    j = bisect.bisect_left(self.__hash_toy_duration_timestamp[duration_found], elf_timestamp)
-                    if j != 0:
-                        break
-                except:
-                    print len(self.get_hash_toy_duration_timestamp())
-                    print len(self.get_hash_toy_duration_values())
-                    print self.__available_toy_duration
-                    raise
+                print duration, duration_found, elf_timestamp, self.__hash_toy_duration_timestamp[duration_found]
+                j = bisect.bisect_right(self.__hash_toy_duration_timestamp[duration_found], elf_timestamp)
+                if j != 0:
+                    break
 
             if j == 0:
                 return None

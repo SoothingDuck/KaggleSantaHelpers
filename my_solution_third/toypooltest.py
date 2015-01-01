@@ -87,6 +87,70 @@ class ToyPoolTest(unittest.TestCase):
         toy = toy_pool.get_toy_by_duration_for_elf(elf2, 21)
         self.assertEquals(toy, toy3)
 
+
+    def test_duration_update(self):
+        
+        elf = Elf(1)
+        elf_future = Elf(2)
+        elf_future.wait_till_next_day()
+
+        toypool = ToyPool()
+        toy1 = Toy(1, "2014 1 1 8 0", 116)
+        toy2 = Toy(2, "2014 1 1 8 0", 116)
+        toy3 = Toy(3, "2014 1 1 8 0", 117)
+        toy4 = Toy(4, "2014 1 1 8 0", 117)
+        toy5 = Toy(5, "2014 1 1 8 0", 118)
+        toy6 = Toy(6, "2014 1 1 8 0", 118)
+        toypool.push_toy_in_waiting_list(toy1)
+        toypool.push_toy_in_waiting_list(toy2)
+        toypool.push_toy_in_waiting_list(toy3)
+        toypool.push_toy_in_waiting_list(toy4)
+        toypool.push_toy_in_waiting_list(toy5)
+        toypool.push_toy_in_waiting_list(toy6)
+
+        toypool.update_available_toy_list_according_to_elf(elf)
+
+        self.assertEquals(toypool.get_available_toy_duration(), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_timestamp().keys()), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_values().keys()), [116, 117, 118])
+
+        toy = toypool.get_next_shortest_toy_for_elf(elf)
+
+        self.assertEquals(toypool.get_available_toy_duration(), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_timestamp().keys()), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_values().keys()), [116, 117, 118])
+
+        toy = toypool.get_next_longest_toy_for_elf(elf)
+
+        self.assertEquals(toypool.get_available_toy_duration(), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_timestamp().keys()), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_values().keys()), [116, 117, 118])
+
+        toy6 = Toy(6, "2014 1 1 9 5", 118)
+        toypool.push_toy_in_waiting_list(toy6)
+        toypool.update_available_toy_list_according_to_elf(elf_future)
+
+        self.assertEquals(toypool.get_available_toy_duration(), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_timestamp().keys()), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_values().keys()), [116, 117, 118])
+
+        print toypool.get_available_toy_duration()
+        print toypool.get_hash_toy_duration_timestamp()
+
+        toy = toypool.get_toy_by_duration_for_elf(elf, 118, True)
+        toy = toypool.get_toy_by_duration_for_elf(elf, 118, True)
+        toy = toypool.get_toy_by_duration_for_elf(elf, 118, True)
+
+        print toypool.get_available_toy_duration()
+        print toypool.get_hash_toy_duration_timestamp()
+
+        self.assertEquals(toypool.get_available_toy_duration(), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_timestamp().keys()), [116, 117, 118])
+        self.assertEquals(sorted(toypool.get_hash_toy_duration_values().keys()), [116, 117, 118])
+
+        print toypool.get_hash_toy_duration_timestamp()
+
+    
     def test_get_next_longest_toy(self):
 
         self.elf.wait_till_next_day()
@@ -96,8 +160,12 @@ class ToyPoolTest(unittest.TestCase):
         self.assertEquals(self.toy_small_pool.length_available_list(), 4)
 
         self.assertEquals(self.toy_small_pool.get_available_toy_duration(), [2, 60, 600])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_timestamp().keys()), [2, 60, 600])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_values().keys()), [2, 60, 600])
         toy = self.toy_small_pool.get_next_longest_toy_for_elf(self.elf)
         self.assertEquals(self.toy_small_pool.get_available_toy_duration(), [2, 60])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_timestamp().keys()), [2, 60])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_values().keys()), [2, 60])
 
         self.assertEquals(toy, self.toy1)
 
@@ -107,14 +175,20 @@ class ToyPoolTest(unittest.TestCase):
         toy = self.toy_small_pool.get_next_longest_toy_for_elf(self.elf)
         self.assertEquals(toy.get_duration(), 60)
         self.assertEquals(self.toy_small_pool.get_available_toy_duration(), [2, 60])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_timestamp().keys()), [2, 60])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_values().keys()), [2, 60])
 
         toy = self.toy_small_pool.get_next_longest_toy_for_elf(self.elf)
         self.assertEquals(toy.get_duration(), 60)
         self.assertEquals(self.toy_small_pool.get_available_toy_duration(), [2])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_timestamp().keys()), [2])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_values().keys()), [2])
 
         toy = self.toy_small_pool.get_next_longest_toy_for_elf(self.elf)
         self.assertEquals(toy.get_duration(), 2)
         self.assertEquals(self.toy_small_pool.get_available_toy_duration(), [])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_timestamp().keys()), [])
+        self.assertEquals(sorted(self.toy_small_pool.get_hash_toy_duration_values().keys()), [])
 
         toy = self.toy_small_pool.get_next_longest_toy_for_elf(self.elf)
         self.assertTrue(toy is None)

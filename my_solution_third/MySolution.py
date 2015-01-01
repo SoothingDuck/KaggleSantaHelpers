@@ -104,7 +104,7 @@ if __name__ == '__main__':
             toy_max_minutes = int(minutes_left*productivity)
 
             # Etape 4.2 : Selectionner un jouet disposant d'un nombre de minutes inférieur à toy_max_minutes
-            toy_expected_duration = random.randint(1, toy_max_minutes)
+            toy_expected_duration = random.randint(1, toy_max_minutes-1)
             toy = mytoypool.get_toy_by_duration_for_elf(elf, toy_expected_duration)
 
             # Etape 4.2, Cas 1 : Un jouet de ce type n'existe pas
@@ -117,7 +117,7 @@ if __name__ == '__main__':
                     myelfpool.update_elf(elf)
                 else:
                     # Sinon pas trop le choix on réalise la prochain jouet le plus "court"
-                    toy = mytoypool.get_next_shortest_toy()
+                    toy = mytoypool.get_next_shortest_toy_for_elf(elf)
                     elf.make_toy(toy, wcsv)
 
                     myelfpool.update_elf(elf)
