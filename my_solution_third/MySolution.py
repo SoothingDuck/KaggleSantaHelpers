@@ -87,8 +87,14 @@ if __name__ == '__main__':
             # Etape 3 : Récupérer le jouet le plus gros disponible
             toy = mytoypool.get_next_longest_toy_for_elf()
 
-            # Etape 4 : Faire le jouet
-            elf.make_toy(toy, wcsv)
+            if toy is not None:
+                # Etape 4 : Faire le jouet
+                elf.make_toy(toy, wcsv)
+            else:
+                # On avance d'une minute
+                t = elf.get_next_available_time()
+                next_t = hrs.next_sanctioned_minute(t)
+                elf.set_next_available_time(next_t)
 
             # Etape 5 : Mettre à jour l'elfe dans le pool d'elfes
             myelfpool.update_elf(elf)
@@ -102,6 +108,13 @@ if __name__ == '__main__':
             # Etape 3.2 : Avec la productivité, calculer le nombre de minutes max pouvant être consacrées à un jouet
             productivity = elf.get_productivity()
             toy_max_minutes = int(minutes_left*productivity)
+
+            # Ca de rejet
+            if toy_max_minutes <= 1:
+                # On remet ça à demain
+                elf.wait_till_next_day()
+                myelfpool.update_elf(elf)
+                continue
 
             # Etape 4.2 : Selectionner un jouet disposant d'un nombre de minutes inférieur à toy_max_minutes
             toy_expected_duration = random.randint(1, toy_max_minutes-1)
@@ -118,7 +131,15 @@ if __name__ == '__main__':
                 else:
                     # Sinon pas trop le choix on réalise la prochain jouet le plus "court"
                     toy = mytoypool.get_next_shortest_toy_for_elf(elf)
-                    elf.make_toy(toy, wcsv)
+
+                    if toy is not None:
+                        # on fait
+                        elf.make_toy(toy, wcsv)
+                    else:
+                        # on passe à la minute suivante
+                        t = elf.get_next_available_time()
+                        next_t = hrs.next_sanctioned_minute(t)
+                        elf.set_next_available_time(next_t)
 
                     myelfpool.update_elf(elf)
                     
