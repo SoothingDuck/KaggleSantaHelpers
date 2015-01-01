@@ -78,16 +78,18 @@ class Elf:
             self.next_available_time = self.hrs.apply_resting_period(end_minute, unsanctioned)
 
         # Mise à jour productivité
-        self.rating = max(0.25,
+        old_rating = self.rating
+        new_rating = max(0.25,
                           min(4.0, self.rating * (self.rating_increase ** (sanctioned/60.0)) *
                               (self.rating_decrease ** (unsanctioned/60.0))))
+        self.rating = new_rating
 
         # Ecriture du jouet
         # print(toy)
         tt = self.ref_time + datetime.timedelta(minutes=start_minute)
         # print "tt : %s" % tt
         time_string = " ".join([str(tt.year), str(tt.month), str(tt.day), str(tt.hour), str(tt.minute)])
-        wcsv.writerow([toy.id, self.id, time_string, toy_required_minutes])
+        wcsv.writerow([toy.id, self.id, time_string, toy_required_minutes, toy_duration, old_rating, new_rating, sanctioned, unsanctioned])
 
         # print(self)
         # print(self.get_next_available_working_time())
