@@ -5,6 +5,7 @@ from toypool import ToyPool
 from elfpool import ElfPool
 from hours import Hours
 
+import math
 import datetime
 import time
 import os
@@ -19,9 +20,9 @@ import random
 if __name__ == '__main__':
 
     def usage():
-        print "python MySolution.py NUM_ELVES NUM_TOYS"
+        print "python MySolution.py NUM_ELVES NUM_TOYS MAX_PRODUCTIVITY MINUTES_END_OF_DAY"
 
-    if len(sys.argv[1:]) != 2:
+    if len(sys.argv[1:]) != 4:
         usage()
         sys.exit(1)
 
@@ -32,11 +33,13 @@ if __name__ == '__main__':
 
     NUM_ELVES = int(sys.argv[1])
     NUM_TOYS = int(sys.argv[2])
-    PRODUCTIVITY_THRESHOLD = 3.75
-    MINUTES_LEFT_END_OF_DAY = 60
+    PRODUCTIVITY_THRESHOLD = float(sys.argv[3])
+    MINUTES_LEFT_END_OF_DAY = int(sys.argv[4])
+
+    PRODUCTIVITY_THRESHOLD_STR = str(PRODUCTIVITY_THRESHOLD).replace(".", "_")
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
-    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_third_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
+    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_third_num_elves_%d_num_toys_%d_prod_%s_minutes_%d.csv' % (NUM_ELVES, NUM_TOYS, PRODUCTIVITY_THRESHOLD_STR, MINUTES_LEFT_END_OF_DAY))
 
     # Objet hours
     hrs = Hours()
@@ -51,7 +54,7 @@ if __name__ == '__main__':
     # Fichier dans lequel logger la solution
     w = open(soln_file, 'wb')
     wcsv = csv.writer(w)
-    wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration'])
+    wcsv.writerow(['ToyId', 'ElfId', 'StartTime', 'Duration', 'Original_Toy_Duration', 'Old_Productivity', 'New_Productivity', 'Sanctioned', 'Unsanctioned'])
 
     c = 0
 
@@ -137,8 +140,21 @@ if __name__ == '__main__':
                     toy = mytoypool.get_next_shortest_toy_for_elf(elf)
 
                     if toy is not None:
-                        # on fait
-                        elf.make_toy(toy, wcsv)
+                        # Si le temps requis est inférieur au temps restant
+                        toy_duration = toy.get_duration()
+                        productivity = elf.get_productivity()
+                        toy_required_minutes = int(math.ceil(toy_duration / productivity))
+
+                        if toy_required_minutes < minutes_left:
+                            # on fait
+                            elf.make_toy(toy, wcsv)
+                        elif mytoypool.length_waiting_list() <= 900:
+                            elf.make_toy(toy, wcsv)
+                        else:
+                            mytoypool.push_toy_in_available_list(toy)
+                            t = elf.get_next_available_time()
+                            next_t = hrs.next_sanctioned_minute(t)
+                            elf.set_next_available_time(next_t)
                     else:
                         # on passe à la minute suivante
                         t = elf.get_next_available_time()
