@@ -201,7 +201,7 @@ class ToyPool:
             fcsv.next()  # header row
             for row in fcsv:
                 i += 1
-                new_toy = Toy(row[0], row[1], row[2])
+                new_toy = Toy(row[0], row[1], row[2], "int")
                 self.push_toy_in_waiting_list(new_toy)
 
                 if self.length_waiting_list() % 1000 == 0:

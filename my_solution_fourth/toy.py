@@ -6,10 +6,13 @@ import math
 from hours import Hours
 
 class Toy:
-    def __init__(self, toyid, arrival, duration):
+    def __init__(self, toyid, arrival, duration, format_arrival="str"):
         self.reference_start_time = datetime.datetime(2014, 1, 1, 0, 0)  # set when elf starts working on toy
         self.id = toyid
-        self.arrival_minute = Hours.convert_to_minute(arrival)
+        if format_arrival == "str":
+            self.arrival_minute = Hours.convert_to_minute(arrival)
+        else:
+            self.arrival_minute = int(arrival)
         self.duration = int(duration)
         self.completed_minute = 0
 

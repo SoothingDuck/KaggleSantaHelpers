@@ -17,6 +17,10 @@ class Elf:
 
         self.ref_time = datetime.datetime(2014, 1, 1, 0, 0)
 
+    def get_id(self):
+        """Retourne l'id de l'elfe"""
+        return self.id
+
     def get_next_available_time(self):
         """Recupere le next_available_time"""
         return self.next_available_time
