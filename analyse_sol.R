@@ -1,7 +1,7 @@
 library(lubridate)
 library(ggplot2)
 
-soln.file <- "DATA/my_solution_third_num_elves_500_num_toys_200000_prod_2_5_minutes_30.csv"
+soln.file <- "DATA/my_solution_third_num_elves_900_num_toys_10000000_prod_3_5_minutes_120.csv"
 
 df <- read.csv(soln.file, stringsAsFactors = FALSE)
 df$timestamp <- ymd_hm(df$StartTime)

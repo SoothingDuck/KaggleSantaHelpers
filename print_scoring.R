@@ -13,5 +13,5 @@ ggplot(subset(df, nb_toys == 2000000)) + geom_point(aes(x=nb_elves, y=minutes, s
 ggplot(df) + geom_point(aes(x=nb_elves, y=minutes, size=score)) + facet_wrap(~ nb_toys)
 
 
-ggplot(subset(df, nb_toys == 2000000)) + geom_bar(aes(x=factor(nb_elves), weight=score)) + facet_wrap(~ minutes)
+ggplot(subset(df, nb_toys == 10000000)) + geom_bar(aes(x=factor(nb_elves), weight=score)) + facet_wrap(~ minutes)
 

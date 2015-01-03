@@ -147,6 +147,8 @@ if __name__ == '__main__':
     print ' -- All toys read. Starting to score submission. '
 
     sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_third_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
+
+    print "File read = %s" % sub_file
     #sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavail_%d.csv' % NUM_TOYS)
     #sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavailifproductive_%d.csv' % NUM_TOYS)
     #sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_bigqueue_%d.csv' % NUM_TOYS)
