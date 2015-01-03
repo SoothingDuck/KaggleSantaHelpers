@@ -2,7 +2,7 @@
 
 for NB_TOYS in 10000000
 do
-	for NB_ELVES in 500 700 900
+	for NB_ELVES in 750 800 850 900
 	do
 			for LAST_MINUTE in 120
 			do
