@@ -3,15 +3,15 @@ library(stringr)
 
 df <- read.csv("scores.csv", stringsAsFactors=FALSE)
 
-df$minutes <- sapply(df$filename, function(x) { as.integer(strsplit(strsplit(x, "_")[[1]][14], "\\.")[[1]][1]) })
+df$minutes <- sapply(df$filename, function(x) { as.integer(strsplit(strsplit(x, "_")[[1]][11], "\\.")[[1]][1]) })
 df$threshold <- sapply(df$filename, function(x) { 
-  as.numeric(paste(strsplit(x, "_")[[1]][11:12], collapse = "."))
+  as.numeric(paste(strsplit(x, "_")[[1]][8:9], collapse = "."))
     })
+df$ratio <- sapply(df$filename, function(x) { 
+  tmp <- strsplit(x, "_")[[1]][14:15]
+  tmp <- str_replace(tmp, ".csv", "")
+  as.numeric(paste(tmp, collapse = "."))
+})
 
-ggplot(subset(df, nb_toys == 2000000)) + geom_point(aes(x=nb_elves, y=minutes, size=score)) + facet_wrap(~ nb_toys)
 
-ggplot(df) + geom_point(aes(x=nb_elves, y=minutes, size=score)) + facet_wrap(~ nb_toys)
-
-
-ggplot(subset(df, nb_toys == 10000000)) + geom_bar(aes(x=factor(nb_elves), weight=score)) + facet_wrap(~ minutes)
-
+ggplot(df) + geom_bar(aes(x=ratio, weight=score), position="dodge") + facet_grid(minutes ~ threshold)
