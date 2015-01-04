@@ -43,7 +43,7 @@ for row in fcsv:
     toy_arrival_day = toy_arrival_minute / 1440
     toy_duration = new_toy.get_duration()
 
-    heapq.heappush(toy_heap, (-(toy_duration+toy_arrival_minute), new_toy))
+    heapq.heappush(toy_heap, (-(toy_duration), new_toy))
 
     if i % 1000 == 0:
         print i
