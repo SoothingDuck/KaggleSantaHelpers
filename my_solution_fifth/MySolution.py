@@ -21,9 +21,9 @@ import random
 if __name__ == '__main__':
 
     def usage():
-        print "python MySolution.py NUM_ELVES MAX_PRODUCTIVITY MINUTES_END_OF_DAY RATIO_RANDOM"
+        print "python MySolution.py NUM_ELVES MAX_PRODUCTIVITY MINUTES_END_OF_DAY RATIO_RANDOM MIN_DURATION"
 
-    if len(sys.argv[1:]) != 4:
+    if len(sys.argv[1:]) != 5:
         usage()
         sys.exit(1)
 
@@ -35,12 +35,14 @@ if __name__ == '__main__':
     PRODUCTIVITY_THRESHOLD = float(sys.argv[2])
     MINUTES_LEFT_END_OF_DAY = int(sys.argv[3])
     RATIO_RANDOM = float(sys.argv[4])
+    MIN_DURATION = int(sys.argv[5])
+
 
     PRODUCTIVITY_THRESHOLD_STR = str(PRODUCTIVITY_THRESHOLD).replace(".", "_")
     RATIO_RANDOM_STR = str(RATIO_RANDOM).replace(".", "_")
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
-    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_fourth_num_elves_%d_prod_%s_minutes_%d_ratio_random_%s.csv' % (NUM_ELVES, PRODUCTIVITY_THRESHOLD_STR, MINUTES_LEFT_END_OF_DAY, RATIO_RANDOM_STR))
+    soln_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_fifth_num_elves_%d_prod_%s_minutes_%d_ratio_random_%s_min_duration_%d.csv' % (NUM_ELVES, PRODUCTIVITY_THRESHOLD_STR, MINUTES_LEFT_END_OF_DAY, RATIO_RANDOM_STR, MIN_DURATION))
 
     # Objet hours
     hrs = Hours()
@@ -102,7 +104,7 @@ if __name__ == '__main__':
                 continue
 
             # Etape 2, Cas 1 : La productivité est supérieure au seuil
-            if productivity > PRODUCTIVITY_THRESHOLD:
+            if productivity > PRODUCTIVITY_THRESHOLD and mytoypool.get_max_available_duration() > MIN_DURATION:
                 # Etape 3 : Récupérer le jouet le plus gros disponible
                 toy = mytoypool.get_next_longest_toy_for_elf(elf)
 
@@ -175,7 +177,6 @@ if __name__ == '__main__':
                     elf.make_toy(toy, wcsv)
 
         print("Fin de travail de l'elfe %d..." % num_elf)
-        sys.exit(1)
 
 
 

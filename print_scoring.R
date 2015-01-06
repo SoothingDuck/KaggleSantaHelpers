@@ -12,6 +12,12 @@ df$ratio <- sapply(df$filename, function(x) {
   tmp <- str_replace(tmp, ".csv", "")
   as.numeric(paste(tmp, collapse = "."))
 })
+df$min.duration <- sapply(df$filename, function(x) { 
+  tmp <- strsplit(x, "_")[[1]][18]
+  tmp <- str_replace(tmp, ".csv", "")
+  as.numeric(paste(tmp, collapse = "."))
+})
 
 
-ggplot(df) + geom_bar(aes(x=ratio, weight=score), position="dodge") + facet_grid(minutes ~ threshold)
+
+ggplot(df) + geom_bar(aes(x=ratio, weight=score, fill=factor(minutes)),position="dodge") + facet_grid(min.duration ~ threshold)

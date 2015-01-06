@@ -133,20 +133,17 @@ if __name__ == '__main__':
     def usage():
         print "python SantasHelpers_Evaluation_Metric.py NUM_ELVES NUM_TOYS"
 
-    if len(sys.argv[1:]) != 2:
+    if len(sys.argv[1:]) != 1:
         usage()
         sys.exit(1)
 
     start = time.time()
 
-    NUM_ELVES = int(sys.argv[1])
-    NUM_TOYS = int(sys.argv[2])
+    sub_file = sys.argv[1]
 
     toy_file = os.path.join(os.getcwd(), '..', 'DATA', 'toys_rev2.csv')
     myToys = read_toys(toy_file, NUM_TOYS)
     print ' -- All toys read. Starting to score submission. '
-
-    sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'my_solution_third_num_elves_%d_num_toys_%d.csv' % (NUM_ELVES, NUM_TOYS))
 
     print "File read = %s" % sub_file
     #sub_file = os.path.join(os.getcwd(), '..', 'DATA', 'sampleSubmission_rev2_firstavail_%d.csv' % NUM_TOYS)

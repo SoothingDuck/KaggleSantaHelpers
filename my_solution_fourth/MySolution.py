@@ -175,7 +175,7 @@ if __name__ == '__main__':
                     elf.make_toy(toy, wcsv)
 
         print("Fin de travail de l'elfe %d..." % num_elf)
-        sys.exit(1)
+        #sys.exit(1)
 
 
 
