@@ -1,4 +1,4 @@
 KaggleSantaHelpers
 ==================
 
-For https://github.com/mrcanard/KaggleSantaHelpers competition
+For https://www.kaggle.com/competitions/helping-santas-helpers competition
